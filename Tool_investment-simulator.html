@@ -901,8 +901,7 @@ window.SPX_DATA=history.SPX_DATA;window.NDX_DATA=history.NDX_DATA;
 // Two indices: S&P 500 and Nasdaq 100 — daily closes, 2016-01-04 to 2026-09-09
 // Drawdown is measured against each index's true all-time peak (computed from full history).
 // Fields: d=dayNumber, dt=date (ISO), p=price, pk=peakToDate, dd=drawdownPct
-window.SPX_DATA =;
-window.NDX_DATA =;
+
 
 
 })().catch(e=>{document.body.innerHTML='<main style="font:16px system-ui;padding:2rem"><h1>History data unavailable</h1><p>'+String(e.message||e)+'</p></main>';});
