@@ -7,6 +7,9 @@ on:
         required: true
         default: all
         type: string
+concurrency:
+  group: yahoo-history-refresh-main
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
