@@ -165,7 +165,7 @@ footer{color:var(--muted);font-size:12.5px;margin-top:26px;line-height:1.6}
 <script>
 (async()=>{
 
-const RAW;
+const RAW=await fetch('./data/backtest-history.json?refresh='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('History JSON unavailable');return r.json()});
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
