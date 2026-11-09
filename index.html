@@ -244,7 +244,7 @@ const TOOLS = [
     url: "https://sgkjeajk.github.io/fintools/Tool_crash_buying_simulator_dbs_ocbc.html",
     tag: "Simulate", art: "drawdown", tone: "teal"
   }
-  // ← add new tools here
+  //  add new tools here
 ];
 
 /* Settings menu items. Add more here later. */
@@ -301,7 +301,7 @@ function render() {
         <span class="open">Open tool ${ARROW}</span>
       </div>
     </a>`;
-  }).join("") : `<div class="empty">No tools match “${esc(qEl.value)}”. Try a different word.</div>`;
+  }).join("") : `<div class="empty">No tools match "${esc(qEl.value)}". Try a different word.</div>`;
   countEl.textContent = TOOLS.length === 1 ? "1 tool" : TOOLS.length + " tools";
   searchEl.classList.toggle("on", TOOLS.length > 6);
 }
@@ -391,3 +391,4 @@ requestAnimationFrame(frame);
 </script>
 </body>
 </html>
+
