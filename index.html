@@ -217,6 +217,13 @@
   .admin-link:hover,.admin-link:focus-visible { opacity:1; color:var(--ink-soft); }
   @media(max-width:520px){.site-footer{align-items:flex-end}.admin-link{flex:none}}
 
+
+  .tool-section { margin-top:48px; padding-top:34px; border-top:1px solid var(--line); }
+  .cpf-section .list-head { margin-bottom:24px; }
+  .cpf-section .tool { max-width:360px; }
+  .cpf-section .art svg { height:112px; }
+  @media(max-width:760px){.tool-section{margin-top:34px;padding-top:26px}.cpf-section .tool{max-width:none}}
+
 </style>
 </head>
 <body>
@@ -259,6 +266,38 @@
     </label>
   </div>
   <div class="grid" id="grid"></div>
+  <section class="tool-section cpf-section" aria-labelledby="cpf-heading">
+    <div class="list-head">
+      <div class="section-kicker">Plan for the future</div>
+      <div>
+        <h2 id="cpf-heading">CPF Tools</h2>
+        <div class="count">1 tool</div>
+      </div>
+    </div>
+    <div class="grid">
+      <a class="tool" href="./Crystal_Ball.html">
+        <div class="art amber">
+          <svg viewBox="0 0 240 100" aria-hidden="true">
+            <path d="M12 82H228M12 56H228M12 30H228" fill="none" stroke="#ffffff" stroke-opacity=".45" stroke-width="1"/>
+            <rect x="34" y="61" width="20" height="21" rx="4" fill="#d8911e" opacity=".65"/>
+            <rect x="62" y="49" width="20" height="33" rx="4" fill="#d8911e" opacity=".78"/>
+            <rect x="90" y="38" width="20" height="44" rx="4" fill="#d8911e" opacity=".9"/>
+            <path d="M42 54 73 42 100 47 131 28 154 34" fill="none" stroke="#0b8a8f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="190" cy="53" r="31" fill="#f2b552"/>
+            <circle cx="190" cy="53" r="24" fill="none" stroke="#9a6410" stroke-opacity=".55" stroke-width="1.5"/>
+            <text x="190" y="63" text-anchor="middle" font-family="system-ui,sans-serif" font-size="29" font-weight="700" fill="#68400a">$</text>
+            <path d="m151 34 8 0-1 8" fill="none" stroke="#0b8a8f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="tool-body">
+          <span class="tag amber">Retirement planning</span>
+          <h3>CPF Cry$tal Ball</h3>
+          <p>Explore CPF and SRS contributions, retirement projections, and investing scenarios.</p>
+          <span class="open">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="site-footer"><span>Prices are historical and for learning only. They are not financial advice.</span><a class="admin-link" href="./admin.html">admin</a></footer>
