@@ -11,6 +11,7 @@ SPECS = {
         "Nasdaq-100":"^NDX", "UOB":"U11.SI", "OCBC":"O39.SI", "DBS":"D05.SI"}),
     "investment": ("data/investment-history.json", {"SPX_DATA":"^GSPC", "NDX_DATA":"^NDX"}),
     "crash": ("data/crash-history.json", {"dbs":"D05.SI", "ocbc":"O39.SI", "uob":"U11.SI"}),
+    "ai-crash": ("data/crash-history-ai.json", {"microsoft":"MSFT", "meta":"META", "google":"GOOGL"}),
 }
 def fetch(symbol, start):
     query = urllib.parse.urlencode({"period1":int(dt.datetime.combine(start,dt.time(),dt.timezone.utc).timestamp()),
