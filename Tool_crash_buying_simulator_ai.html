@@ -860,7 +860,7 @@ body[data-theme="ocbc"] {         /* OCBC — plum & mint */
       <!-- CHART -->
       <div class="panel panel-chart">
         <div class="panel-header">
-          <span id="chart-title">DBS GROUP (D05.SI) · CLOSING PRICE (S$)</span>
+          <span id="chart-title">DBS GROUP (D05.SI) · CLOSING PRICE ($)</span>
           <span class="panel-sub">
             <button class="scale-btn" id="btn-scale" title="Switch between log and linear price scale">LOG</button>
             <span class="legend-swatch legend-price"></span>Price
@@ -888,7 +888,7 @@ body[data-theme="ocbc"] {         /* OCBC — plum & mint */
               </div>
             </div>
             <div class="ti-field">
-              <label>Amount (S$)</label>
+              <label>Amount ($)</label>
               <input type="number" id="trade-amount" min="0" step="100" value="0" />
             </div>
             <div class="ti-field">
@@ -968,7 +968,7 @@ body[data-theme="ocbc"] {         /* OCBC — plum & mint */
   </div>
 
   <footer class="app-footer">
-    <span><span id="footer-asset">DBS Group (D05.SI, S$)</span> · Ladder −10% to −40%, every 5% · 5-day re-fire rule · Closing prices adjusted for splits, bonus and rights issues only; dividends not included · For educational use</span>
+    <span><span id="footer-asset">DBS Group (D05.SI, $)</span> · Ladder −10% to −40%, every 5% · 5-day re-fire rule · Closing prices adjusted for splits, bonus and rights issues only; dividends not included · For educational use</span>
     <span class="footer-tag">Discipline compounds. Euphoria does not.</span>
   </footer>
 
@@ -1053,9 +1053,9 @@ body[data-theme="ocbc"] {         /* OCBC — plum & mint */
     if (!isFinite(n)) return '—';
     const sign = n < 0 ? '-' : '';
     const abs = Math.abs(n);
-    return sign + 'S$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return sign + '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
-  const fmtPrice = (n) => 'S$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPrice = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtPct = (n, digits = 2) => {
     if (!isFinite(n)) return '—';
     return (n * 100).toFixed(digits) + '%';
@@ -1916,8 +1916,8 @@ body[data-theme="ocbc"] {         /* OCBC — plum & mint */
   function renderAssetText() {
     document.body.dataset.theme = assetId;
     $('app-title').textContent = `Crash Buying Simulator - ${ASSET.short}`;
-    $('chart-title').textContent = `${ASSET.name.toUpperCase()} (${ASSET.ticker}) · CLOSING PRICE (S$)`;
-    $('footer-asset').textContent = `${ASSET.name} (${ASSET.ticker}, S$)`;
+    $('chart-title').textContent = `${ASSET.name.toUpperCase()} (${ASSET.ticker}) · CLOSING PRICE ($)`;
+    $('footer-asset').textContent = `${ASSET.name} (${ASSET.ticker}, $)`;
     $('crash-badges').innerHTML = ASSET.chips.map((c, i) =>
       `<button class="jump-chip ${i === 0 ? '' : 'crash'}" data-day="${c.day}" title="${esc(c.title)}">${esc(c.label)}</button>`).join('');
     renderTabs();
