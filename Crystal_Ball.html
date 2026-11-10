@@ -1,0 +1,3345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=2128b912-35e3-47f5-8986-1c0748e5d825
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CPF Cry$tal Ball — Singapore retirement projection simulator with disciplined-investing levers and two-bucket equity model.">
+<title>CPF Cry$tal Ball · Retirement Projection Simulator</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+<style>
+/* ============================================================
+   CPF CRY$TAL BALL — DESIGN TOKENS
+   ============================================================ */
+:root {
+  --navy-deepest: #07203F;
+  --navy-dark:    #0B2D5B;
+  --navy:         #143D7A;
+  --navy-mid:     #1F4E96;
+  --royal:        #1F5DC4;
+  --royal-light:  #4A7BD4;
+
+  --sky-pale:     #F4F8FD;
+  --sky-light:    #DCE8F7;
+  --sky-mid:      #B8C9DD;
+  --paper:        #FBFAF6;
+  --cream:        #F5F0E1;
+
+  --gold:         #B8924A;
+  --gold-deep:    #8C6B2C;
+  --gold-light:   #F0E1BD;
+  --gold-pale:    #F9F2DE;
+
+  --ink:          #1A1F2C;
+  --ink-mid:      #4B5567;
+  --ink-soft:     #7A8395;
+  --ink-faint:    #A9B0BC;
+  --line:         #DCE0E8;
+  --line-soft:    #E8EBF0;
+
+  --green:        #2D7A3E;
+  --green-bg:     #DFF0E2;
+  --red:          #B33A3A;
+  --red-bg:       #F6DEDE;
+
+  --serif:   'Fraunces', Georgia, serif;
+  --sans:    'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:    'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  --maxw:    1240px;
+  --gutter:  clamp(20px, 4vw, 56px);
+  --radius:  4px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+.frame {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ============================================================
+   MASTHEAD
+   ============================================================ */
+.masthead {
+  background: var(--navy-deepest);
+  color: var(--paper);
+  padding: 36px 0 28px;
+  position: relative;
+  overflow: hidden;
+}
+.masthead::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(31, 93, 196, 0.22), transparent 50%),
+    radial-gradient(ellipse at 20% 100%, rgba(184, 146, 74, 0.1), transparent 60%);
+  pointer-events: none;
+}
+.masthead-inner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.logo-mark {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(184, 146, 74, 0.35));
+}
+.brand-text {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.005em;
+  color: var(--paper);
+  line-height: 1;
+}
+.brand-text::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0;
+}
+.title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(28px, 4.4vw, 50px);
+  line-height: 1.02;
+  letter-spacing: -0.022em;
+  margin: 14px 0 8px;
+  color: var(--paper);
+}
+.title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold-light);
+}
+.subtitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--sky-light);
+  max-width: 540px;
+  margin: 0;
+  letter-spacing: 0.005em;
+}
+.dateline {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: right;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.dateline span { color: var(--gold-light); }
+
+.hairline-band {
+  background: var(--navy-deepest);
+  border-top: 1px solid rgba(184, 146, 74, 0.4);
+  border-bottom: 1px solid rgba(184, 146, 74, 0.4);
+  padding: 10px 0;
+  color: var(--gold-light);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.hairline-band-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+section { padding: 56px 0 40px; }
+section + section { padding-top: 16px; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--navy-dark);
+  padding-bottom: 12px;
+}
+.section-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--gold-deep);
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(22px, 3vw, 32px);
+  letter-spacing: -0.015em;
+  color: var(--navy-deepest);
+  line-height: 1.1;
+  margin: 0;
+  flex: 1;
+}
+.section-meta {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   HEADLINE STAGE
+   ============================================================ */
+.headline-stage {
+  background: var(--navy-deepest);
+  color: var(--paper);
+  padding: 48px 0;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+.headline-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(184, 146, 74, 0.08), transparent 70%);
+  pointer-events: none;
+}
+.headline-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0;
+  border-left: 1px solid rgba(184, 146, 74, 0.2);
+}
+.headline-cell {
+  border-right: 1px solid rgba(184, 146, 74, 0.2);
+  padding: 8px 28px 8px 28px;
+}
+.headline-cell:first-child { padding-left: 0; }
+.headline-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 12px;
+  display: block;
+}
+.headline-value {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.headline-value .currency {
+  font-size: 0.5em;
+  font-style: italic;
+  color: var(--gold-light);
+  font-weight: 400;
+  margin-right: 2px;
+}
+.headline-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--sky-light);
+  margin-top: 8px;
+}
+
+/* ============================================================
+   FIELD GRIDS — input rows
+   ============================================================ */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.field-grid.cols-1 { grid-template-columns: 1fr; }
+.field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 720px) {
+  .field-grid, .field-grid.cols-3 { grid-template-columns: 1fr; }
+}
+
+.field {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: white;
+  transition: background 200ms ease;
+  position: relative;
+  min-height: 64px;
+}
+.field:hover { background: var(--sky-pale); }
+.field-label {
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  flex: 1;
+  line-height: 1.4;
+}
+.field-label .hint {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+.field-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.field input[type="number"] {
+  width: 130px;
+  padding: 9px 12px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy-deepest);
+  border: 1px solid var(--sky-mid);
+  border-radius: var(--radius);
+  text-align: right;
+  background: white;
+  transition: all 150ms ease;
+  -moz-appearance: textfield;
+}
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.field input[type="number"]:focus {
+  outline: none;
+  border-color: var(--royal);
+  box-shadow: 0 0 0 3px rgba(31, 93, 196, 0.14);
+  background: var(--sky-pale);
+}
+.field-prefix {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.field-suffix {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   TOGGLE
+   ============================================================ */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--ink-faint);
+  border-radius: 28px;
+  transition: background 250ms ease;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle input:checked + .toggle-slider { background: var(--royal); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
+.toggle:hover .toggle-slider { box-shadow: 0 0 0 6px rgba(31, 93, 196, 0.08); }
+.toggle.gold input:checked + .toggle-slider { background: var(--gold); }
+.toggle.gold:hover .toggle-slider { box-shadow: 0 0 0 6px rgba(184, 146, 74, 0.12); }
+.toggle-state {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  width: 28px;
+  text-align: center;
+}
+.toggle-state.on { color: var(--royal); }
+
+/* ============================================================
+   PHASE BAND HEADERS
+   ============================================================ */
+.phase-band {
+  margin: 24px 0 0;
+  padding: 22px 28px;
+  border-left: 6px solid var(--royal);
+  background: linear-gradient(90deg, rgba(31, 93, 196, 0.08), rgba(31, 93, 196, 0.0) 80%);
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.phase-band.post {
+  border-left-color: var(--gold-deep);
+  background: linear-gradient(90deg, rgba(184, 146, 74, 0.10), rgba(184, 146, 74, 0.0) 80%);
+}
+.phase-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--royal);
+}
+.phase-band.post .phase-tag { color: var(--gold-deep); }
+.phase-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: var(--navy-deepest);
+  margin: 0;
+}
+.phase-tagline {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-mid);
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ============================================================
+   LEVER CARDS — phase-aware
+   ============================================================ */
+.lever-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 720px) { .lever-grid { grid-template-columns: 1fr; } }
+
+.lever-card {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 250ms ease;
+  position: relative;
+}
+.lever-card.pre.active {
+  border-color: var(--royal);
+  background: linear-gradient(180deg, white, rgba(31, 93, 196, 0.03));
+  box-shadow: 0 0 0 1px var(--royal), 0 4px 24px rgba(31, 93, 196, 0.08);
+}
+.lever-card.post.active {
+  border-color: var(--gold-deep);
+  background: linear-gradient(180deg, white, rgba(184, 146, 74, 0.04));
+  box-shadow: 0 0 0 1px var(--gold-deep), 0 4px 24px rgba(184, 146, 74, 0.10);
+}
+.lever-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.lever-id {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+}
+.lever-card.pre .lever-id { color: var(--royal); }
+.lever-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--navy-deepest);
+  margin: 4px 0 0;
+  line-height: 1.25;
+}
+.lever-desc {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.55;
+  margin: 0;
+}
+.lever-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  transition: opacity 250ms ease;
+}
+.lever-card:not(.active) .lever-amount-row { opacity: 0.4; pointer-events: none; }
+.lever-amount-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  flex: 1;
+}
+.lever-amount-row input {
+  width: 110px;
+  padding: 7px 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy-deepest);
+  border: 1px solid var(--sky-mid);
+  border-radius: var(--radius);
+  text-align: right;
+  background: white;
+  -moz-appearance: textfield;
+}
+.lever-amount-row input::-webkit-outer-spin-button,
+.lever-amount-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.lever-amount-row input:focus {
+  outline: none;
+  border-color: var(--royal);
+  box-shadow: 0 0 0 3px rgba(31, 93, 196, 0.14);
+}
+
+/* Playbook tag at the bottom of each lever card */
+.lever-tag {
+  margin-top: auto;
+  padding-top: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lever-tag b {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+.lever-card.pre .lever-tag b { color: var(--royal); }
+
+/* Q6 informational card (auto-mechanism, no toggle) */
+.lever-card.info {
+  background: var(--sky-pale);
+  border-style: dashed;
+  border-color: var(--sky-mid);
+  opacity: 0.95;
+}
+.lever-card.info .lever-name { color: var(--ink-mid); }
+.lever-info-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--gold-deep);
+  background: var(--gold-light);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* ============================================================
+   TWO-BUCKET EQUITY CONTROLS
+   ============================================================ */
+.bucket-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+@media (max-width: 720px) { .bucket-grid { grid-template-columns: 1fr; } }
+
+.bucket-card {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 24px 26px;
+  position: relative;
+}
+.bucket-card.crash {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, white, rgba(184, 146, 74, 0.04));
+}
+.bucket-tag {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: var(--navy-deepest);
+  color: var(--gold-light);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+.bucket-card.crash .bucket-tag {
+  background: var(--gold-deep);
+  color: white;
+}
+.bucket-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--navy-deepest);
+  margin: 6px 0 4px;
+  letter-spacing: -0.01em;
+}
+.bucket-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+
+.return-rate-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.return-pill {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border: 1px solid var(--sky-mid);
+  background: white;
+  color: var(--ink-mid);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 150ms ease;
+  letter-spacing: 0.02em;
+}
+.return-pill:hover { border-color: var(--royal); color: var(--royal); }
+.return-pill.active {
+  background: var(--navy-dark);
+  color: var(--paper);
+  border-color: var(--navy-dark);
+}
+.bucket-card.crash .return-pill.active {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+}
+
+.bucket-allocation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.bucket-allocation-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  flex: 1;
+}
+.bucket-allocation-row input {
+  width: 80px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy-deepest);
+  border: 1px solid var(--sky-mid);
+  border-radius: var(--radius);
+  text-align: right;
+  background: white;
+  -moz-appearance: textfield;
+}
+.bucket-allocation-row input::-webkit-outer-spin-button,
+.bucket-allocation-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.bucket-allocation-row input:focus {
+  outline: none;
+  border-color: var(--royal);
+  box-shadow: 0 0 0 3px rgba(31, 93, 196, 0.14);
+}
+
+/* ============================================================
+   PROJECTION TABLE
+   ============================================================ */
+.table-wrap {
+  border: 1px solid var(--line);
+  background: white;
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter);
+}
+.proj-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.proj-table thead th {
+  background: var(--navy-deepest);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 10px;
+  text-align: right;
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+}
+.proj-table thead th:first-child,
+.proj-table thead th:nth-child(2) { text-align: center; }
+.proj-table thead tr.group-header th {
+  background: var(--navy);
+  font-size: 10px;
+  border-right: 1px solid rgba(184, 146, 74, 0.3);
+}
+.proj-table tbody td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.proj-table tbody tr:nth-child(even) td { background: var(--sky-pale); }
+.proj-table tbody td.year-cell,
+.proj-table tbody td.age-cell {
+  text-align: center;
+  font-weight: 600;
+  color: var(--navy-dark);
+  background: var(--cream) !important;
+}
+.proj-table tbody tr.milestone td {
+  border-top: 2px solid var(--gold);
+  background: var(--gold-light) !important;
+  font-weight: 600;
+}
+.proj-table tbody tr.final-row td {
+  border-top: 2px solid var(--navy-deepest);
+  font-weight: 700;
+  background: var(--navy-deepest) !important;
+  color: var(--paper);
+}
+.proj-table tbody td.total-col {
+  font-weight: 700;
+  background: var(--cream) !important;
+  color: var(--navy-deepest);
+  border-left: 1px solid var(--gold);
+  border-right: 1px solid var(--gold);
+}
+.proj-table tbody tr.final-row td.total-col {
+  background: var(--gold) !important;
+  color: var(--paper);
+  border-color: var(--gold-deep);
+}
+.proj-table tbody td.zero { color: var(--ink-faint); }
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  align-items: stretch;
+}
+@media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-card {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 28px;
+}
+.chart-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--navy-deepest);
+  margin: 0 0 4px;
+}
+.chart-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 24px;
+}
+#trajectory-chart, #breakdown-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============================================================
+   AUDIT
+   ============================================================ */
+.audit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px) { .audit-grid { grid-template-columns: 1fr; } }
+
+.audit-block {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 24px 26px;
+}
+.audit-block h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--navy-deepest);
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.audit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  font-size: 13px;
+}
+.audit-row + .audit-row { border-top: 1px solid var(--line-soft); }
+.audit-row-label { color: var(--ink-mid); }
+.audit-row-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.audit-row.total {
+  border-top: 1px solid var(--ink-mid) !important;
+  padding-top: 12px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.audit-row.total .audit-row-value { color: var(--navy-deepest); font-weight: 700; }
+.info-icon {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--gold-deep);
+  font-weight: 600;
+  vertical-align: 1px;
+}
+.audit-row.interest-row {
+  border-bottom: none;
+  padding-bottom: 8px;
+}
+.interest-detail {
+  background: var(--sky-pale);
+  border-left: 3px solid var(--gold);
+  padding: 16px 20px;
+  margin: 4px 0 14px;
+  font-size: 12.5px;
+}
+.interest-detail-header {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.interest-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.interest-detail-row:first-of-type { padding-top: 0; }
+.interest-detail-row:last-of-type { border-bottom: none; padding-bottom: 0; }
+.interest-detail-row.total {
+  border-bottom: none;
+  border-top: 1px solid var(--gold);
+  padding-top: 12px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.interest-detail-name {
+  flex: 1;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.interest-detail-name strong { color: var(--navy-deepest); font-weight: 600; }
+.interest-detail-formula {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 11.5px;
+  color: var(--ink-mid);
+  margin-top: 4px;
+  line-height: 1.55;
+}
+.interest-detail-formula code {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10.5px;
+  background: var(--cream);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--navy-deepest);
+  border: 1px solid var(--gold-light);
+  white-space: nowrap;
+}
+.interest-detail-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy-deepest);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.interest-detail-row.total .interest-detail-value {
+  color: var(--gold-deep);
+  font-size: 14px;
+}
+.check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--green-bg);
+  color: var(--green);
+}
+.check-pill.fail { background: var(--red-bg); color: var(--red); }
+.check-pill::before {
+  content: '✓';
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 12px;
+}
+.check-pill.fail::before { content: '✗'; }
+
+.overall-status {
+  margin-top: 28px;
+  padding: 24px 28px;
+  background: var(--navy-deepest);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.overall-status-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+.overall-status-value {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--paper);
+}
+.overall-status.has-fail { background: var(--red); }
+
+/* ============================================================
+   SENSITIVITY TABLE
+   ============================================================ */
+.sens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line);
+}
+.sens-table th {
+  background: var(--navy-deepest);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 18px;
+  text-align: right;
+}
+.sens-table th:first-child { text-align: left; }
+.sens-table td {
+  padding: 14px 18px;
+  text-align: right;
+  border-bottom: 1px solid var(--line-soft);
+  background: white;
+}
+.sens-table tr:last-child td { border-bottom: none; }
+.sens-table td:first-child {
+  font-weight: 600;
+  text-align: left;
+  color: var(--navy-dark);
+  background: var(--sky-pale);
+}
+.sens-table tr.current-rate td { background: var(--gold-light) !important; font-weight: 700; }
+.sens-table tr.current-rate td:first-child { background: var(--gold) !important; color: var(--paper); }
+
+/* ============================================================
+   INSIGHT CALLOUT
+   ============================================================ */
+.insight {
+  margin: 48px 0;
+  border-top: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
+  padding: 36px 0;
+  text-align: center;
+}
+.insight-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 12px;
+}
+.insight-quote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(20px, 2.6vw, 28px);
+  line-height: 1.4;
+  color: var(--navy-deepest);
+  letter-spacing: -0.01em;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.insight-quote::before { content: '\201C'; color: var(--gold); margin-right: 4px; }
+.insight-quote::after  { content: '\201D'; color: var(--gold); margin-left: 4px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+/* ============================================================
+   DISCLAIMER
+   ============================================================ */
+.disclaimer-section {
+  padding: 64px 0 16px;
+  background: var(--paper);
+}
+.disclaimer-block {
+  border: 2px solid var(--gold);
+  background: var(--cream);
+  padding: 36px 44px;
+  position: relative;
+}
+.disclaimer-block::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  border: 1px solid var(--gold-deep);
+  pointer-events: none;
+}
+.disclaimer-header {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--gold);
+}
+.disclaimer-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--paper);
+  background: var(--gold-deep);
+  padding: 5px 12px;
+  border-radius: 2px;
+  margin-bottom: 10px;
+}
+.disclaimer-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(20px, 2.6vw, 28px);
+  letter-spacing: -0.015em;
+  color: var(--navy-deepest);
+  margin: 0;
+  line-height: 1.2;
+}
+.disclaimer-body p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 0 0 16px;
+  max-width: none;
+}
+.disclaimer-body p strong {
+  color: var(--navy-deepest);
+  font-weight: 700;
+}
+.disclaimer-body p.disclaimer-final {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--gold);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--gold-deep);
+  font-weight: 500;
+}
+
+footer {
+  background: var(--navy-deepest);
+  color: var(--sky-light);
+  padding: 56px 0 36px;
+  margin-top: 80px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+@media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr; gap: 24px; } }
+.footer-col h4 {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+.footer-col p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 8px;
+  color: var(--sky-light);
+  opacity: 0.85;
+}
+.footer-bottom {
+  border-top: 1px solid rgba(184, 146, 74, 0.3);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.footer-bottom strong { color: var(--gold-light); }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.spouse-section { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--gold); }
+.spouse-section.visible { display: block; }
+.spouse-banner {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gold-deep);
+  margin-bottom: 12px;
+}
+.tab-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.proj-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.proj-toolbar .tab-row { margin-bottom: 0; border-bottom: none; }
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--gold-deep);
+  color: var(--paper);
+  padding: 10px 18px;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  transition: all 150ms ease;
+  text-transform: uppercase;
+}
+.download-btn:hover { background: var(--navy-deepest); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(11, 45, 91, 0.2); }
+.download-btn:active { transform: translateY(0); }
+.download-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.download-btn-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--gold-light);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.tab {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 150ms ease;
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--navy-dark); }
+.tab.active {
+  color: var(--navy-deepest);
+  border-bottom-color: var(--gold);
+}
+.proj-content { display: none; }
+.proj-content.active { display: block; }
+
+@keyframes pulseValue {
+  0% { background: rgba(184, 146, 74, 0.25); }
+  100% { background: transparent; }
+}
+.pulse { animation: pulseValue 600ms ease-out; }
+
+.scroll-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(11, 45, 91, 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(184, 146, 74, 0.2);
+  padding: 12px 0;
+}
+.scroll-nav-inner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.scroll-nav-inner::-webkit-scrollbar { display: none; }
+.scroll-nav a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sky-light);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  transition: all 150ms ease;
+}
+.scroll-nav a:hover { color: var(--gold-light); border-bottom-color: var(--gold); }
+.scroll-nav .nav-divider { color: var(--ink-faint); opacity: 0.4; }
+.reset-btn {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.reset-btn:hover { background: var(--gold); color: var(--navy-deepest); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     MASTHEAD
+     ============================================================ -->
+<header class="masthead">
+  <div class="frame masthead-inner">
+    <div>
+      <div class="brand">
+        <svg class="logo-mark" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg-face" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#F0E1BD"/>
+              <stop offset="100%" stop-color="#B8924A"/>
+            </linearGradient>
+            <linearGradient id="lg-shadow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8C6B2C" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#5C4318" stop-opacity="0.95"/>
+            </linearGradient>
+          </defs>
+          <!-- Outer ring (orb suggestion) -->
+          <circle cx="28" cy="28" r="25.5" fill="none" stroke="#B8924A" stroke-width="1.2" opacity="0.6"/>
+          <!-- Crystal: hexagonal cut, top facets light, bottom facets dark -->
+          <!-- Top: pointed crown -->
+          <polygon points="28,8 14,21 28,28 42,21" fill="url(#lg-face)" stroke="#8C6B2C" stroke-width="0.6" stroke-linejoin="round"/>
+          <!-- Left + right side facets, lighter -->
+          <polygon points="14,21 28,28 22,42" fill="#D9B776" stroke="#8C6B2C" stroke-width="0.6" stroke-linejoin="round"/>
+          <polygon points="42,21 34,42 28,28" fill="#D9B776" stroke="#8C6B2C" stroke-width="0.6" stroke-linejoin="round"/>
+          <!-- Bottom point: pavilion, darker -->
+          <polygon points="22,42 28,48 34,42 28,28" fill="url(#lg-shadow)" stroke="#5C4318" stroke-width="0.6" stroke-linejoin="round"/>
+          <!-- Highlight strokes on top crown for sparkle -->
+          <line x1="28" y1="8" x2="28" y2="28" stroke="#FBFAF6" stroke-width="0.8" opacity="0.55"/>
+          <line x1="20" y1="14" x2="28" y2="28" stroke="#FBFAF6" stroke-width="0.5" opacity="0.4"/>
+        </svg>
+        <span class="brand-text">CPF Cry$tal Ball</span>
+      </div>
+      <h1 class="title">Retirement <em>projection</em> simulator</h1>
+      <p class="subtitle">From today to sixty-five — every lever, every dollar, every flow of compounding.</p>
+    </div>
+    <div class="dateline">
+      <span>Edition</span> · 2026<br>
+      Official Singapore CPF rules<br>
+      <button class="reset-btn" onclick="resetAll()" style="margin-top:10px">Reset to defaults</button>
+    </div>
+  </div>
+</header>
+
+<div class="hairline-band">
+  <div class="frame hairline-band-inner">
+    <span>Singapore CPF · Official 2026 · FRS $220,400 · ERS $440,800 · BHS $79,000 · Annual Limit $37,740</span>
+    <span>v3.1 · Two-bucket equity edition</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCROLL NAV
+     ============================================================ -->
+<nav class="scroll-nav">
+  <div class="frame scroll-nav-inner">
+    <a href="#profile">Profile</a><span class="nav-divider">/</span>
+    <a href="#balances">Balances</a><span class="nav-divider">/</span>
+    <a href="#contributions">Contributions</a><span class="nav-divider">/</span>
+    <a href="#equity">Equity Buckets</a><span class="nav-divider">/</span>
+    <a href="#levers">Levers</a><span class="nav-divider">/</span>
+    <a href="#headline">Results</a><span class="nav-divider">/</span>
+    <a href="#projection">Projection</a><span class="nav-divider">/</span>
+    <a href="#charts">Charts</a><span class="nav-divider">/</span>
+    <a href="#audit">Audit</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     SECTION 1 — PROFILE
+     ============================================================ -->
+<section id="profile" class="frame">
+  <div class="section-head">
+    <span class="section-num">i.</span>
+    <h2 class="section-title">Personal profile</h2>
+    <span class="section-meta">Section 1 / 7</span>
+  </div>
+
+  <div class="field-grid cols-1">
+    <div class="field" style="border-bottom: 1px solid var(--line);">
+      <div class="field-label">
+        Include spouse or partner?
+        <span class="hint">Person B inputs appear and household totals add together.</span>
+      </div>
+      <div class="field-control">
+        <span class="toggle-state" id="spouse-state">Off</span>
+        <label class="toggle">
+          <input type="checkbox" id="include-spouse" onchange="toggleSpouse(); recalc();">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-grid cols-3" style="margin-top: -1px;">
+    <div class="field">
+      <div class="field-label">Person A — Current age</div>
+      <div class="field-control">
+        <input type="number" id="age-a" value="45" min="25" max="64" oninput="recalc()">
+        <span class="field-suffix">yrs</span>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Project end age <span class="hint">capped at 65</span></div>
+      <div class="field-control">
+        <input type="number" id="end-age-a" value="65" min="26" max="65" oninput="recalc()">
+        <span class="field-suffix">yrs</span>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Starting year</div>
+      <div class="field-control">
+        <input type="number" id="start-year" value="2026" min="2026" max="2050" oninput="recalc()">
+      </div>
+    </div>
+  </div>
+
+  <div id="spouse-profile" class="spouse-section">
+    <div class="spouse-banner">Person B — Spouse / Partner</div>
+    <div class="field-grid cols-3">
+      <div class="field"><div class="field-label">Person B — Current age</div>
+        <div class="field-control"><input type="number" id="age-b" value="45" min="25" max="64" oninput="recalc()"><span class="field-suffix">yrs</span></div></div>
+      <div class="field"><div class="field-label">Person B — End age</div>
+        <div class="field-control"><input type="number" id="end-age-b" value="65" min="26" max="65" oninput="recalc()"><span class="field-suffix">yrs</span></div></div>
+      <div class="field" style="background: var(--sky-pale); pointer-events: none;">
+        <div class="field-label" style="font-style: italic; color: var(--ink-soft);">Same starting year as Person A</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 2 — STARTING BALANCES
+     ============================================================ -->
+<section id="balances" class="frame">
+  <div class="section-head">
+    <span class="section-num">ii.</span>
+    <h2 class="section-title">Starting balances at current age</h2>
+    <span class="section-meta">Section 2 / 7</span>
+  </div>
+
+  <div class="field-grid cols-1">
+    <div class="field">
+      <div class="field-label">CPF Ordinary Account (OA) — cash <span class="hint">earns 2.5% per year</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="oa-a" value="200000" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">CPF Special Account (SA) — cash <span class="hint">earns 5% on first $60K, 4% above (closes at 55)</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="sa-a" value="160000" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">CPF MediSave (MA) <span class="hint">earns 4%, capped at BHS</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="ma-a" value="65000" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">CPF-invested in S&amp;P 500 (Endowus etc.) <span class="hint">grows in equity buckets — see section iv</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="sp-a" value="80000" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">SRS balance — invested in funds <span class="hint">grows in equity buckets — see section iv</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="srs-a" value="40000" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+  </div>
+
+  <div id="spouse-balances" class="spouse-section">
+    <div class="spouse-banner">Person B — Spouse / Partner</div>
+    <div class="field-grid cols-1">
+      <div class="field"><div class="field-label">CPF Ordinary Account (OA)</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="oa-b" value="150000" min="0" step="1000" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">CPF Special Account (SA)</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="sa-b" value="120000" min="0" step="1000" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">CPF MediSave (MA)</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="ma-b" value="60000" min="0" step="1000" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">CPF-invested in S&amp;P 500</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="sp-b" value="50000" min="0" step="1000" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">SRS balance</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="srs-b" value="20000" min="0" step="1000" oninput="recalc()"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 3 — CONTRIBUTIONS, MORTGAGE
+     ============================================================ -->
+<section id="contributions" class="frame">
+  <div class="section-head">
+    <span class="section-num">iii.</span>
+    <h2 class="section-title">Contributions, top-ups &amp; mortgage</h2>
+    <span class="section-meta">Section 3 / 7</span>
+  </div>
+
+  <div class="field-grid">
+    <div class="field">
+      <div class="field-label">Annual CPF contribution per person <span class="hint">2026 cap is $37,740 — assumed at salary ceiling</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="cpf-contrib-a" value="37740" min="0" step="100" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Stop working at age <span class="hint">CPF contributions end</span></div>
+      <div class="field-control"><input type="number" id="stop-work-a" value="65" min="55" max="70" oninput="recalc()"><span class="field-suffix">yrs</span></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Cash top-up at age 55 (FRS → ERS) <span class="hint">2026 gap is up to $220,400 · enter $0 to skip</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="topup55-a" value="220400" min="0" step="1000" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">SRS annual contribution <span class="hint">cap $15,300</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="srs-contrib-a" value="15300" min="0" max="15300" step="100" oninput="recalc()"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Stop SRS contributions at age</div>
+      <div class="field-control"><input type="number" id="stop-srs-a" value="63" min="40" max="65" oninput="recalc()"><span class="field-suffix">yrs</span></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Monthly mortgage from OA <span class="hint">auto × 12 each year, capped at OA available</span></div>
+      <div class="field-control"><span class="field-prefix">$</span><input type="number" id="mortgage-a" value="0" min="0" step="100" oninput="recalc()"><span class="field-suffix">/mo</span></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Mortgage ends at age <span class="hint">last year of OA deduction</span></div>
+      <div class="field-control"><input type="number" id="mort-end-a" value="65" min="25" max="65" oninput="recalc()"><span class="field-suffix">yrs</span></div>
+    </div>
+  </div>
+
+  <div id="spouse-contrib" class="spouse-section">
+    <div class="spouse-banner">Person B — Spouse / Partner</div>
+    <div class="field-grid">
+      <div class="field"><div class="field-label">Annual CPF contribution</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="cpf-contrib-b" value="37740" min="0" step="100" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">Stop working at age</div><div class="field-control"><input type="number" id="stop-work-b" value="65" min="55" max="70" oninput="recalc()"><span class="field-suffix">yrs</span></div></div>
+      <div class="field"><div class="field-label">Cash top-up at age 55</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="topup55-b" value="220400" min="0" step="1000" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">SRS annual contribution</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="srs-contrib-b" value="15300" min="0" max="15300" step="100" oninput="recalc()"></div></div>
+      <div class="field"><div class="field-label">Stop SRS at age</div><div class="field-control"><input type="number" id="stop-srs-b" value="63" min="40" max="65" oninput="recalc()"><span class="field-suffix">yrs</span></div></div>
+      <div class="field"><div class="field-label">Monthly mortgage from OA</div><div class="field-control"><span class="field-prefix">$</span><input type="number" id="mortgage-b" value="0" min="0" step="100" oninput="recalc()"><span class="field-suffix">/mo</span></div></div>
+      <div class="field"><div class="field-label">Mortgage ends at age</div><div class="field-control"><input type="number" id="mort-end-b" value="65" min="25" max="65" oninput="recalc()"><span class="field-suffix">yrs</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 4 — EQUITY BUCKETS (NEW)
+     ============================================================ -->
+<section id="equity" class="frame">
+  <div class="section-head">
+    <span class="section-num">iv.</span>
+    <h2 class="section-title">Equity return buckets</h2>
+    <span class="section-meta">Section 4 / 7 · NEW</span>
+  </div>
+
+  <p style="font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-mid); margin: 0 0 8px; max-width: 720px;">
+    Your CPF-invested S&amp;P 500 and SRS holdings split into two buckets — the <strong>base bucket</strong> for steady dollar-cost averaging at normal market returns, and the <strong>crash bucket</strong> for dry powder you deploy during market drawdowns. Each bucket compounds at its own rate.
+  </p>
+
+  <div class="bucket-grid">
+    <div class="bucket-card">
+      <span class="bucket-tag">Base Bucket</span>
+      <h3 class="bucket-name">Steady DCA, normal markets</h3>
+      <p class="bucket-sub">Long-run S&amp;P 500 average. Default 8%.</p>
+      <div class="return-rate-row" id="base-pills">
+        <button class="return-pill" data-rate="0.06">6%</button>
+        <button class="return-pill active" data-rate="0.08">8%</button>
+        <button class="return-pill" data-rate="0.10">10%</button>
+        <button class="return-pill" data-rate="0.12">12%</button>
+      </div>
+    </div>
+    <div class="bucket-card crash">
+      <span class="bucket-tag">Crash Buying Bucket</span>
+      <h3 class="bucket-name">Disciplined deployment during drawdowns</h3>
+      <p class="bucket-sub">Higher returns earned by buying when others are selling.</p>
+      <div class="return-rate-row" id="crash-pills">
+        <button class="return-pill" data-rate="0.12">12%</button>
+        <button class="return-pill active" data-rate="0.13">13%</button>
+        <button class="return-pill" data-rate="0.14">14%</button>
+        <button class="return-pill" data-rate="0.15">15%</button>
+        <button class="return-pill" data-rate="0.16">16%</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="field-grid cols-3" style="margin-top: 28px;">
+    <div class="field" style="grid-column: 1 / -1; background: var(--sky-pale);">
+      <div class="field-label" style="font-weight: 600; color: var(--navy-dark);">
+        Crash bucket allocation
+        <span class="hint">What % of your equity holdings (S&amp;P 500 + SRS + future contributions) sits in the crash bucket. Set 0% to disable.</span>
+      </div>
+      <div class="field-control" style="display: flex; gap: 16px; align-items: center;">
+        <label style="font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: 0.08em;">CPF→S&amp;P</label>
+        <input type="number" id="sp-crash-pct" value="0" min="0" max="80" step="5" oninput="recalc()" style="width: 70px;">
+        <span class="field-suffix">%</span>
+        <span style="color: var(--line); margin: 0 8px;">|</span>
+        <label style="font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: 0.08em;">SRS</label>
+        <input type="number" id="srs-crash-pct" value="0" min="0" max="80" step="5" oninput="recalc()" style="width: 70px;">
+        <span class="field-suffix">%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 5 — LEVERS (PRE-55 + POST-55)
+     ============================================================ -->
+<section id="levers" class="frame">
+  <div class="section-head">
+    <span class="section-num">v.</span>
+    <h2 class="section-title">Levers — Pre-55 and Post-55</h2>
+    <span class="section-meta">Section 5 / 7</span>
+  </div>
+
+  <p style="font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-mid); margin: 0; max-width: 720px;">
+    Each lever is mapped to the Pre-55 / Post-55 playbook framework. Pre-55 levers are about loading the cannon; post-55 levers are about firing it. Toggle one at a time, or stack them. The headline result updates instantly so you can see what each is worth.
+  </p>
+
+  <!-- PRE-55 PHASE BAND -->
+  <div class="phase-band">
+    <span class="phase-tag">Pre-55</span>
+    <h3 class="phase-title">Loading the cannon</h3>
+    <span class="phase-tagline">Active in your accumulation phase. Decades of compounding ahead.</span>
+  </div>
+
+  <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 6px;">Person A · Pre-55</p>
+  <div class="lever-grid" id="levers-pre-a"></div>
+
+  <div id="spouse-levers-pre" class="spouse-section">
+    <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px;">Person B · Pre-55</p>
+    <div class="lever-grid" id="levers-pre-b"></div>
+  </div>
+
+  <!-- POST-55 PHASE BAND -->
+  <div class="phase-band post" style="margin-top: 36px;">
+    <span class="phase-tag">Post-55</span>
+    <h3 class="phase-title">Firing the cannon</h3>
+    <span class="phase-tagline">RA opens with tiered 4-6%. The next ten years decide whether it earns its potential.</span>
+  </div>
+
+  <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 6px;">Person A · Post-55</p>
+  <div class="lever-grid" id="levers-post-a"></div>
+
+  <div id="spouse-levers-post" class="spouse-section">
+    <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px;">Person B · Post-55</p>
+    <div class="lever-grid" id="levers-post-b"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HEADLINE STAGE
+     ============================================================ -->
+<div id="headline" class="headline-stage">
+  <div class="frame">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px; margin-bottom: 24px;">
+      <div>
+        <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-light);">vi. The Result</div>
+        <h2 style="font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4vw, 44px); margin: 8px 0 0; letter-spacing: -0.02em; color: var(--paper);">Household at project end</h2>
+      </div>
+      <div style="font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--sky-light); max-width: 320px; text-align: right;">Updates the moment you change any input above.</div>
+    </div>
+    <div class="headline-grid">
+      <div class="headline-cell">
+        <span class="headline-label">Total Wealth at End Age</span>
+        <div class="headline-value"><span class="currency">S$</span><span id="hl-total-num">0</span></div>
+        <div class="headline-sub" id="hl-multiplier">— × your starting wealth</div>
+      </div>
+      <div class="headline-cell">
+        <span class="headline-label">CAGR Achieved</span>
+        <div class="headline-value" id="hl-cagr">0.0%</div>
+        <div class="headline-sub" id="hl-years">over — years</div>
+      </div>
+      <div class="headline-cell">
+        <span class="headline-label">Cash Deployed</span>
+        <div class="headline-value"><span class="currency">S$</span><span id="hl-cash">0</span></div>
+        <div class="headline-sub">across top-ups, refunds, mortgage</div>
+      </div>
+      <div class="headline-cell">
+        <span class="headline-label">Starting Wealth</span>
+        <div class="headline-value"><span class="currency">S$</span><span id="hl-start">0</span></div>
+        <div class="headline-sub">household combined today</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PROJECTION TABLE
+     ============================================================ -->
+<section id="projection" class="frame">
+  <div class="section-head">
+    <span class="section-num">vi.</span>
+    <h2 class="section-title">Year-by-year projection</h2>
+    <span class="section-meta">Every flow visible</span>
+  </div>
+
+  <div class="proj-toolbar">
+    <div class="tab-row" id="proj-tabs">
+      <button class="tab active" data-target="proj-a">Person A</button>
+      <button class="tab" data-target="proj-b" id="tab-b" style="display:none">Person B</button>
+    </div>
+    <button class="download-btn" id="download-xlsx" onclick="downloadProjectionXlsx()">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M8 1v9.6L4.7 7.3l-1.4 1.4L8 13.4l4.7-4.7-1.4-1.4L8 10.6V1H8z"/>
+        <path d="M2 14h12v1H2z"/>
+      </svg>
+      Download as Excel <span class="download-btn-meta">.xlsx · live formulas</span>
+    </button>
+  </div>
+
+  <div class="proj-content active" id="proj-a">
+    <div class="table-wrap">
+      <table class="proj-table">
+        <thead>
+          <tr class="group-header">
+            <th rowspan="2">Yr</th>
+            <th rowspan="2">Age</th>
+            <th rowspan="2">CPF In</th>
+            <th colspan="3">Ordinary (OA)</th>
+            <th colspan="2">SA / RA</th>
+            <th colspan="2">MediSave (MA)</th>
+            <th colspan="2">SRS</th>
+            <th colspan="2">CPF→S&amp;P</th>
+            <th rowspan="2">Year Total</th>
+            <th rowspan="2">Cum. Cash Out</th>
+          </tr>
+          <tr>
+            <th>Contrib</th><th>Interest</th><th>End</th>
+            <th>Contrib</th><th>End</th>
+            <th>Top-up</th><th>End</th>
+            <th>Contrib</th><th>End</th>
+            <th>Transfer</th><th>End</th>
+          </tr>
+        </thead>
+        <tbody id="proj-body-a"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="proj-content" id="proj-b">
+    <div class="table-wrap">
+      <table class="proj-table">
+        <thead>
+          <tr class="group-header">
+            <th rowspan="2">Yr</th><th rowspan="2">Age</th><th rowspan="2">CPF In</th>
+            <th colspan="3">Ordinary (OA)</th><th colspan="2">SA / RA</th>
+            <th colspan="2">MediSave (MA)</th><th colspan="2">SRS</th>
+            <th colspan="2">CPF→S&amp;P</th>
+            <th rowspan="2">Year Total</th><th rowspan="2">Cum. Cash Out</th>
+          </tr>
+          <tr>
+            <th>Contrib</th><th>Interest</th><th>End</th><th>Contrib</th><th>End</th>
+            <th>Top-up</th><th>End</th><th>Contrib</th><th>End</th><th>Transfer</th><th>End</th>
+          </tr>
+        </thead>
+        <tbody id="proj-body-b"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="frame">
+  <div class="insight">
+    <div class="insight-label">Insight</div>
+    <p class="insight-quote">A projection without levers teaches fatalism. A projection <em>with</em> levers teaches agency.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHARTS
+     ============================================================ -->
+<section id="charts" class="frame">
+  <div class="section-head">
+    <span class="section-num">vii.</span>
+    <h2 class="section-title">Trajectory &amp; account mix</h2>
+    <span class="section-meta">Visual summary</span>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">Wealth trajectory by age</h3>
+      <p class="chart-sub">Compounding over time, household combined.</p>
+      <svg id="trajectory-chart" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Account mix at end age</h3>
+      <p class="chart-sub">Where the money sits.</p>
+      <svg id="breakdown-chart" viewBox="0 0 320 380" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SENSITIVITY
+     ============================================================ -->
+<section id="sensitivity" class="frame">
+  <div class="section-head">
+    <span class="section-num">viii.</span>
+    <h2 class="section-title">Base bucket sensitivity</h2>
+    <span class="section-meta">Time in market</span>
+  </div>
+
+  <p style="font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-mid); margin: 0 0 24px; max-width: 720px;">
+    Holding everything else constant, this is how household wealth at end age changes with the base equity bucket return rate. Crash bucket allocation and rate stay at your current settings.
+  </p>
+
+  <table class="sens-table">
+    <thead><tr><th>Base Bucket Return</th><th>Household at End Age</th><th>Δ vs 8%</th><th>× of 8%</th></tr></thead>
+    <tbody id="sens-body"></tbody>
+  </table>
+</section>
+
+<div class="frame">
+  <div class="insight">
+    <div class="insight-label">Insight</div>
+    <p class="insight-quote">Two more percent, repeated for twenty years, is not 40% more — it is much more.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     AUDIT
+     ============================================================ -->
+<section id="audit" class="frame">
+  <div class="section-head">
+    <span class="section-num">ix.</span>
+    <h2 class="section-title">Live integrity audit</h2>
+    <span class="section-meta">Self-validating</span>
+  </div>
+
+  <p style="font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-mid); margin: 0 0 28px; max-width: 720px;">
+    Every check below auto-runs against your current inputs. Reconciliation must tie to the dollar: starting wealth + every inflow + all interest − every outflow must equal ending wealth.
+  </p>
+
+  <div class="audit-grid">
+    <div class="audit-block">
+      <h3>Wealth reconciliation — Person A</h3>
+      <div id="audit-recon-a"></div>
+    </div>
+    <div class="audit-block" id="audit-recon-b-block" style="display:none;">
+      <h3>Wealth reconciliation — Person B</h3>
+      <div id="audit-recon-b"></div>
+    </div>
+  </div>
+
+  <div class="audit-grid" style="margin-top: 24px;">
+    <div class="audit-block" style="grid-column: 1 / -1;">
+      <h3>Integrity checks</h3>
+      <div id="audit-checks"></div>
+    </div>
+  </div>
+
+  <div class="overall-status" id="overall-status">
+    <span class="overall-status-label">Overall model status</span>
+    <span class="overall-status-value" id="overall-text">— running</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     DISCLAIMER — STRONG, PROMINENT
+     ============================================================ -->
+<section class="disclaimer-section">
+  <div class="frame">
+    <div class="disclaimer-block">
+      <div class="disclaimer-header">
+        <span class="disclaimer-tag">Important — please read</span>
+        <h2 class="disclaimer-title">Disclaimer &amp; acceptance of possible errors</h2>
+      </div>
+      <div class="disclaimer-body">
+        <p>
+          <strong>This simulator is a financial education tool. It is not financial advice.</strong>
+          The figures it produces are illustrative projections based on the official 2026 Singapore CPF rules
+          as we understand them, applied to the inputs you have entered. They are not predictions, not guarantees,
+          and not a substitute for professional financial advice.
+        </p>
+        <p>
+          <strong>Errors may exist.</strong> Despite careful calibration to published CPF Board values,
+          the model may contain mistakes — in formulas, in lever logic, in edge cases, in interpretation
+          of the rules, or in the assumptions baked into the simulation. CPF rules also change over time,
+          and a value that is correct today may be outdated tomorrow.
+        </p>
+        <p>
+          <strong>By using this simulator, you accept the possibility of errors.</strong>
+          You agree that the operators of this site bear no responsibility for any decision you make based on
+          its output. You agree to verify any number that matters to your financial decisions
+          directly with the CPF Board, with a licensed financial adviser, or with both. You understand that
+          the simulator's projections rely on assumptions — about future market returns, about future CPF rules,
+          about your own future earnings and contributions — that may turn out to be wrong.
+        </p>
+        <p class="disclaimer-final">
+          If you do not accept these terms, please close this page and do not use the simulator.
+          Continued use of the simulator constitutes acceptance.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="frame">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>About this simulator</h4>
+        <p>The CPF Cry$tal Ball is a financial education simulator that models year-by-year retirement projections under official 2026 CPF rules. It is calibrated to the dollar against published FRS, ERS, BHS, and contribution rate values.</p>
+        <p style="margin-top: 12px;">The simulator is a teaching tool, not financial advice. It models documented simplifications: no salary growth, no drawdown phase, no tax-savings modelling. Always verify with the CPF Board for your own circumstances.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Methodology</h4>
+        <p>CPF Board · 2026 official values</p>
+        <p>Allocation rates · 1 January 2026</p>
+        <p>FRS / ERS / BHS as published</p>
+      </div>
+      <div class="footer-col">
+        <h4>Integrity</h4>
+        <p>Every formula is visible. Every flow reconciles to the dollar. The audit section at the bottom of this page validates the model in real time, against your current inputs.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 · <strong>CPF Cry$tal Ball</strong></span>
+      <span>Singapore CPF Education</span>
+      <span>v3.1 · Two-bucket equity edition</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT — full projection engine v2
+     ============================================================ -->
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const FRS_2026 = 220400;
+const ERS_2026 = 440800;
+const BHS_2026 = 79000;
+const FRS_GROWTH = 0.035;
+const BHS_GROWTH = 0.045;
+const BASE_YEAR = 2026;
+
+const RATE_OA = 0.025;
+const RATE_SA_LOW = 0.05;
+const RATE_SA_HIGH = 0.04;
+const RATE_RA_T1 = 0.06;
+const RATE_RA_T2 = 0.05;
+const RATE_RA_T3 = 0.04;
+const RATE_MA = 0.04;
+
+const CPF_CEILING = 102000;
+const CPF_ANNUAL_LIMIT = 37740;
+const OA_BUFFER_FOR_SP = 20000;
+
+const STATUTORY_RATES = [
+  { minAge: 0,  maxAge: 55, rate: 0.37 },
+  { minAge: 55, maxAge: 60, rate: 0.325 },
+  { minAge: 60, maxAge: 65, rate: 0.225 },
+  { minAge: 65, maxAge: 70, rate: 0.165 },
+  { minAge: 70, maxAge: 99, rate: 0.125 },
+];
+function getStatutoryRate(age) {
+  for (const b of STATUTORY_RATES) if (age >= b.minAge && age < b.maxAge) return b.rate;
+  return 0.125;
+}
+function getStatutoryMaxContrib(age) { return CPF_CEILING * getStatutoryRate(age); }
+
+const ALLOC_BANDS = [
+  [25, 0.6217, 0.1621, 0.2162],
+  [35, 0.5677, 0.1891, 0.2432],
+  [45, 0.5136, 0.2162, 0.2702],
+  [50, 0.4055, 0.3108, 0.2837],
+];
+function getAlloc(age) {
+  let b = ALLOC_BANDS[0];
+  for (const band of ALLOC_BANDS) if (age >= band[0]) b = band;
+  return { oa: b[1], sa: b[2], ma: b[3] };
+}
+
+// ============================================================
+// LEVER DEFINITIONS
+// ============================================================
+const PRE_LEVERS = [
+  { id: 'l1', playbook: 'P2', name: 'Annual MA top-ups to BHS',
+    desc: 'Top up your MediSave to the new BHS each year. MA earns 4% on the full balance and excess interest overflows to OA. (Active post-55 too.)',
+    defaultOn: true, hasAmount: false },
+  { id: 'l2', playbook: 'P3', name: 'Multiple income streams',
+    desc: 'Second job — CPF cap is per-employment, so combined annual contribution can exceed $37,740. Extra flow goes to OA.',
+    defaultOn: false, hasAmount: true,
+    amountLabel: 'Extra annual CPF', amountDefault: 10000, amountPrefix: '$' },
+  { id: 'l3', playbook: 'P5', name: 'Voluntary housing refund',
+    desc: 'One-time lump sum into OA from a property sale or cash injection at a chosen age.',
+    defaultOn: false, hasAmount: true,
+    amountLabel: 'Refund amount', amountDefault: 100000, amountPrefix: '$',
+    extraInput: { label: 'Refund at age', default: 50, suffix: 'yrs' } },
+  { id: 'l4', playbook: 'P7', name: 'Annual OA → S&P 500',
+    desc: 'Transfer OA above the $20K CPFIS buffer into the S&P 500 each year via Endowus.',
+    defaultOn: false, hasAmount: true,
+    amountLabel: 'Annual transfer', amountDefault: 20000, amountPrefix: '$' },
+  { id: 'l6', playbook: 'P1', name: 'Annual cash RSTU to SA',
+    desc: 'Voluntarily top up your Special Account each year. Capped at FRS minus current SA. Earns 5% on first $60K.',
+    defaultOn: false, hasAmount: true,
+    amountLabel: 'Annual RSTU', amountDefault: 8000, amountPrefix: '$' },
+];
+
+const POST_LEVERS = [
+  { id: 'l5', playbook: 'Q4', name: 'Voluntary top-up to $37,740 cap',
+    desc: 'After 55, statutory contribution falls to 32.5% then 22.5%. Voluntarily fill the gap with cash so the full $37,740 keeps flowing in each year.',
+    defaultOn: true, hasAmount: false },
+  { id: 'l7', playbook: 'Q2', name: 'Annual ERS-cap-increase top-ups',
+    desc: 'ERS rises ~3.5% per year. Top up RA each January to the new ERS — about $7,700/year on the 2026 base.',
+    defaultOn: false, hasAmount: false },
+  { id: 'q6', playbook: 'Q6', name: 'SA-excess overflow at 55', info: true,
+    desc: 'At age 55, anything in SA above FRS automatically moves to OA. This happens by default in your projection — no toggle needed.' },
+];
+
+function buildLevers(personSuffix, isPost) {
+  const container = document.getElementById((isPost ? 'levers-post-' : 'levers-pre-') + personSuffix);
+  if (!container) return;
+  container.innerHTML = '';
+  const list = isPost ? POST_LEVERS : PRE_LEVERS;
+  list.forEach(lev => {
+    const div = document.createElement('div');
+    if (lev.info) {
+      div.className = 'lever-card info ' + (isPost ? 'post' : 'pre');
+      div.innerHTML = `
+        <div class="lever-card-header">
+          <div>
+            <div class="lever-id">${lev.id.toUpperCase()}</div>
+            <h3 class="lever-name">${lev.name}</h3>
+          </div>
+          <span class="lever-info-badge">Automatic</span>
+        </div>
+        <p class="lever-desc">${lev.desc}</p>
+        <div class="lever-tag">Playbook: <b>${lev.playbook}</b></div>
+      `;
+      container.appendChild(div);
+      return;
+    }
+    div.className = 'lever-card ' + (isPost ? 'post' : 'pre') + (lev.defaultOn ? ' active' : '');
+    div.id = 'card-' + lev.id + '-' + personSuffix;
+    let amountHtml = '';
+    if (lev.hasAmount) {
+      amountHtml = `
+        <div class="lever-amount-row">
+          <span class="lever-amount-label">${lev.amountLabel}</span>
+          ${lev.amountPrefix ? `<span class="field-prefix">${lev.amountPrefix}</span>` : ''}
+          <input type="number" id="${lev.id}-amt-${personSuffix}" value="${lev.amountDefault}" min="0" step="1000" oninput="recalc()">
+        </div>`;
+    }
+    if (lev.extraInput) {
+      amountHtml += `
+        <div class="lever-amount-row" style="border-top: 0; padding-top: 0; margin-top: -8px;">
+          <span class="lever-amount-label">${lev.extraInput.label}</span>
+          <input type="number" id="${lev.id}-extra-${personSuffix}" value="${lev.extraInput.default}" min="25" max="64" oninput="recalc()">
+          <span class="field-suffix">${lev.extraInput.suffix}</span>
+        </div>`;
+    }
+    div.innerHTML = `
+      <div class="lever-card-header">
+        <div>
+          <div class="lever-id">${lev.id.toUpperCase()}</div>
+          <h3 class="lever-name">${lev.name}</h3>
+        </div>
+        <label class="toggle ${isPost ? 'gold' : ''}">
+          <input type="checkbox" id="${lev.id}-${personSuffix}" ${lev.defaultOn ? 'checked' : ''} onchange="onLeverToggle(this, '${lev.id}', '${personSuffix}')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p class="lever-desc">${lev.desc}</p>
+      ${amountHtml}
+      <div class="lever-tag">Playbook: <b>${lev.playbook}</b></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function onLeverToggle(input, leverId, suffix) {
+  document.getElementById('card-' + leverId + '-' + suffix).classList.toggle('active', input.checked);
+  recalc();
+}
+
+// ============================================================
+// PROJECTION ENGINE
+// ============================================================
+function projectPerson(p) {
+  const rows = [];
+  const nYears = Math.min(p.endAge, 65) - p.currentAge + 1;
+  if (nYears <= 0) return rows;
+
+  let oaPrev = p.oaStart, saPrev = p.saStart, maPrev = p.maStart;
+  const spBaseFrac = Math.max(0, Math.min(1, 1 - p.spCrashFrac));
+  const srsBaseFrac = Math.max(0, Math.min(1, 1 - p.srsCrashFrac));
+  let spBasePrev = p.spStart * spBaseFrac;
+  let spCrashPrev = p.spStart * p.spCrashFrac;
+  let srsBasePrev = p.srsStart * srsBaseFrac;
+  let srsCrashPrev = p.srsStart * p.srsCrashFrac;
+  let cumCashOut = 0;
+
+  for (let i = 0; i < nYears; i++) {
+    const age = p.currentAge + i;
+    const year = p.startYear + i;
+    if (age > 65 || age > p.endAge) break;
+    const working = age < p.stopWork ? 1 : 0;
+    const yearsFromBase = year - BASE_YEAR;
+    const ersLimit = ERS_2026 * Math.pow(1 + FRS_GROWTH, yearsFromBase);
+    const frsLimit = ersLimit / 2;
+    const bhsLimit = BHS_2026 * Math.pow(1 + BHS_GROWTH, yearsFromBase);
+    const isPre55 = age < 55;
+    const alloc = isPre55 ? getAlloc(age) : { oa: 1.0, sa: 0, ma: 0 };
+
+    let statutoryContrib;
+    if (isPre55) {
+      statutoryContrib = p.cpfContrib * working;
+    } else {
+      const maxStat = getStatutoryMaxContrib(age);
+      statutoryContrib = Math.min(p.cpfContrib, maxStat) * working;
+    }
+
+    let l5Topup = 0;
+    if (!isPre55 && p.l5 && working) {
+      l5Topup = Math.max(0, CPF_ANNUAL_LIMIT - statutoryContrib);
+    }
+    const l2Extra = (p.l2 ? p.l2Amt : 0) * working;
+    const totalCpfIn = statutoryContrib + l5Topup + l2Extra;
+
+    // === Pre-route L5 voluntary cash to OA / SA / MA ===
+    // L5 follows the age-50 allocation template. SA share is capped at RA's room (ERS - current RA),
+    // and any overflow re-routes to OA so no money is silently dropped.
+    let l5OaShare = 0, l5SaShare = 0, l5MaShare = 0, l5SaOverflowToOa = 0;
+    if (!isPre55 && p.l5 && l5Topup > 0) {
+      const tmpl = ALLOC_BANDS[ALLOC_BANDS.length - 1];
+      l5OaShare = l5Topup * tmpl[1];
+      l5MaShare = l5Topup * tmpl[3];
+      const l5SaShareIntent = l5Topup * tmpl[2];
+      // RA room calculation depends on age:
+      //   age 55 — RA opens with min(saPrev, FRS) + topup55, room is up to ERS
+      //   age 56+ — RA balance = saPrev, room is up to ERS
+      let raBaseForRoom;
+      if (age === 55) raBaseForRoom = Math.min(saPrev, frsLimit) + p.topup55;
+      else raBaseForRoom = saPrev;
+      const raRoom = Math.max(0, ersLimit - raBaseForRoom);
+      l5SaShare = Math.min(l5SaShareIntent, raRoom);
+      l5SaOverflowToOa = l5SaShareIntent - l5SaShare;
+    }
+
+    // === MA block ===
+    let maContribTarget, maExcessPre55 = 0;
+    if (isPre55) {
+      maContribTarget = (statutoryContrib + l2Extra) * alloc.ma;
+    } else {
+      maContribTarget = l5MaShare;
+    }
+    const maRoom = Math.max(0, bhsLimit - maPrev);
+    const maContrib = Math.min(maContribTarget, maRoom);
+    if (isPre55) maExcessPre55 = Math.max(0, maContribTarget - maRoom);
+    const maTopup = (p.l1 ? Math.max(0, bhsLimit - (maPrev + maContrib)) : 0);
+    const maInterest = maPrev * RATE_MA;
+    const maEnd = Math.min(bhsLimit, maPrev + maContrib + maTopup + maInterest);
+    const maOverflowToOa = Math.max(0, maPrev + maContrib + maTopup + maInterest - bhsLimit);
+
+    // === OA block ===
+    let oaContribStatutory;
+    if (isPre55) {
+      oaContribStatutory = (statutoryContrib + l2Extra) * alloc.oa;
+    } else {
+      oaContribStatutory = statutoryContrib + l2Extra;
+    }
+    // OA receives L5's OA share PLUS any L5 SA-share that overflowed RA's ERS cap
+    const oaContribL5 = l5OaShare + l5SaOverflowToOa;
+    const oaContrib = oaContribStatutory + oaContribL5;
+    const oaInterest = oaPrev * RATE_OA;
+    const adjIn55 = age === 55 ? Math.max(0, saPrev - frsLimit) : 0;
+    const refund = (p.l3 && age === p.l3Age) ? p.l3Amt : 0;
+    const mortgageAnnual = age <= p.mortEnd ? p.mortgage * 12 : 0;
+    const oaPreMortgage = oaPrev + oaContrib + maOverflowToOa + oaInterest + adjIn55 + refund;
+    const mortgage = Math.min(mortgageAnnual, oaPreMortgage);
+    const oaAfterMortgage = oaPreMortgage - mortgage;
+    const oaToSp = p.l4 ? Math.min(p.l4Amt, Math.max(0, oaAfterMortgage - OA_BUFFER_FOR_SP)) : 0;
+    const oaEnd = oaAfterMortgage - oaToSp;
+
+    // === SA / RA block ===
+    let saContrib = 0, l6Contrib = 0, l7Contrib = 0, saContribL5 = l5SaShare;
+    if (isPre55) {
+      saContrib = (statutoryContrib + l2Extra) * alloc.sa + maExcessPre55;
+      if (p.l6 && working) {
+        const saRoom = Math.max(0, frsLimit - (saPrev + saContrib));
+        l6Contrib = Math.min(p.l6Amt, saRoom);
+        saContrib += l6Contrib;
+      }
+    } else if (age === 55) {
+      saContrib = p.topup55 + l5SaShare;
+    } else {
+      if (p.l7) {
+        const yb = year - BASE_YEAR;
+        const ersThis = ERS_2026 * Math.pow(1 + FRS_GROWTH, yb);
+        const ersPrev = ERS_2026 * Math.pow(1 + FRS_GROWTH, yb - 1);
+        l7Contrib = Math.max(0, ersThis - ersPrev);
+        saContrib = l7Contrib;
+      }
+      saContrib += l5SaShare;
+    }
+
+    let saInterest = 0;
+    if (isPre55) {
+      saInterest = Math.min(saPrev, 60000) * RATE_SA_LOW + Math.max(0, saPrev - 60000) * RATE_SA_HIGH;
+    } else if (age === 55) {
+      const raBal55 = Math.min(saPrev, frsLimit) + p.topup55;
+      saInterest = Math.min(raBal55, 30000) * RATE_RA_T1
+                 + Math.min(Math.max(raBal55 - 30000, 0), 30000) * RATE_RA_T2
+                 + Math.max(raBal55 - 60000, 0) * RATE_RA_T3;
+    } else {
+      const raBalPost = saPrev;
+      saInterest = Math.min(raBalPost, 30000) * RATE_RA_T1
+                 + Math.min(Math.max(raBalPost - 30000, 0), 30000) * RATE_RA_T2
+                 + Math.max(raBalPost - 60000, 0) * RATE_RA_T3;
+    }
+    const adjOut55 = age === 55 ? Math.max(0, saPrev - frsLimit) : 0;
+    let saEnd;
+    if (isPre55) saEnd = saPrev + saContrib + saInterest;
+    else if (age === 55) saEnd = saPrev + saContrib + saInterest - adjOut55;
+    else saEnd = saPrev + saContrib + saInterest;
+
+    // === SRS (two-bucket) ===
+    const srsContrib = (age < p.stopSrs) ? p.srsContrib : 0;
+    const srsBaseContrib = srsContrib * srsBaseFrac;
+    const srsCrashContrib = srsContrib * p.srsCrashFrac;
+    const srsBaseGrowth = srsBasePrev * p.spBaseRate;
+    const srsCrashGrowth = srsCrashPrev * p.spCrashRate;
+    const srsBaseEnd = srsBasePrev + srsBaseContrib + srsBaseGrowth;
+    const srsCrashEnd = srsCrashPrev + srsCrashContrib + srsCrashGrowth;
+    const srsEnd = srsBaseEnd + srsCrashEnd;
+    const srsGrowth = srsBaseGrowth + srsCrashGrowth;
+
+    // === CPF-S&P (two-bucket) ===
+    const spIn = oaToSp;
+    const spInBase = spIn * spBaseFrac;
+    const spInCrash = spIn * p.spCrashFrac;
+    const spBaseGrowth = spBasePrev * p.spBaseRate;
+    const spCrashGrowth = spCrashPrev * p.spCrashRate;
+    const spBaseEnd = spBasePrev + spInBase + spBaseGrowth;
+    const spCrashEnd = spCrashPrev + spInCrash + spCrashGrowth;
+    const spEnd = spBaseEnd + spCrashEnd;
+    const spGrowth = spBaseGrowth + spCrashGrowth;
+
+    const yearTotal = oaEnd + saEnd + maEnd + srsEnd + spEnd;
+    const cashOut55 = age === 55 ? p.topup55 : 0;
+    const annualCashOut = maTopup + cashOut55 + refund + mortgage + l5Topup + l6Contrib + l7Contrib;
+    cumCashOut += annualCashOut;
+
+    rows.push({
+      year, age, isPre55,
+      totalCpfIn, statutoryContrib, l2Extra, l5Topup, l6Contrib, l7Contrib,
+      oaStart: oaPrev, oaContrib, maOverflowToOa, oaInterest, adjIn55, refund, mortgage, oaToSp, oaEnd,
+      saStart: saPrev, saContrib, saInterest, adjOut55, saEnd,
+      ersLimit, bhsLimit, frsLimit,
+      maStart: maPrev, maContrib, maTopup, maInterest, maEnd,
+      srsContrib, srsGrowth, srsEnd,
+      spIn, spGrowth, spEnd,
+      yearTotal, annualCashOut, cumCashOut,
+    });
+    oaPrev = oaEnd; saPrev = saEnd; maPrev = maEnd;
+    spBasePrev = spBaseEnd; spCrashPrev = spCrashEnd;
+    srsBasePrev = srsBaseEnd; srsCrashPrev = srsCrashEnd;
+  }
+  return rows;
+}
+
+// ============================================================
+// READ INPUTS
+// ============================================================
+function getNum(id) { const el = document.getElementById(id); if (!el) return 0; const v = parseFloat(el.value); return isNaN(v) ? 0 : v; }
+function getCheck(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+
+function readPerson(suffix) {
+  const basePill = document.querySelector('#base-pills .return-pill.active');
+  const crashPill = document.querySelector('#crash-pills .return-pill.active');
+  const baseRate = basePill ? parseFloat(basePill.dataset.rate) : 0.08;
+  const crashRate = crashPill ? parseFloat(crashPill.dataset.rate) : 0.13;
+  return {
+    currentAge: getNum('age-' + suffix),
+    endAge: Math.min(getNum('end-age-' + suffix), 65),
+    startYear: getNum('start-year'),
+    oaStart: getNum('oa-' + suffix),
+    saStart: getNum('sa-' + suffix),
+    maStart: getNum('ma-' + suffix),
+    spStart: getNum('sp-' + suffix),
+    srsStart: getNum('srs-' + suffix),
+    cpfContrib: getNum('cpf-contrib-' + suffix),
+    stopWork: getNum('stop-work-' + suffix),
+    topup55: getNum('topup55-' + suffix),
+    mortgage: getNum('mortgage-' + suffix),
+    mortEnd: getNum('mort-end-' + suffix),
+    srsContrib: getNum('srs-contrib-' + suffix),
+    stopSrs: getNum('stop-srs-' + suffix),
+    spBaseRate: baseRate, spCrashRate: crashRate,
+    spCrashFrac: getNum('sp-crash-pct') / 100,
+    srsCrashFrac: getNum('srs-crash-pct') / 100,
+    l1: getCheck('l1-' + suffix),
+    l2: getCheck('l2-' + suffix), l2Amt: getNum('l2-amt-' + suffix),
+    l3: getCheck('l3-' + suffix), l3Amt: getNum('l3-amt-' + suffix), l3Age: getNum('l3-extra-' + suffix),
+    l4: getCheck('l4-' + suffix), l4Amt: getNum('l4-amt-' + suffix),
+    l5: getCheck('l5-' + suffix),
+    l6: getCheck('l6-' + suffix), l6Amt: getNum('l6-amt-' + suffix),
+    l7: getCheck('l7-' + suffix),
+  };
+}
+
+// ============================================================
+// FORMAT HELPERS
+// ============================================================
+function fmt$(n, dp = 0) {
+  if (!isFinite(n)) return '—';
+  const s = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  return (n < 0 ? '−' : '') + s;
+}
+function fmtPct(n, dp = 1) { if (!isFinite(n)) return '—'; return (n*100).toFixed(dp) + '%'; }
+function fmtCell(n) { if (Math.abs(n) < 0.5) return '<span class="zero">·</span>'; return fmt$(n); }
+
+// ============================================================
+// RENDER PROJECTION TABLE
+// ============================================================
+function renderProjection(rows, bodyId) {
+  const tbody = document.getElementById(bodyId);
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:var(--ink-soft);padding:30px">No projection (check ages)</td></tr>';
+    return;
+  }
+  let html = '';
+  rows.forEach((r, i) => {
+    const isMile = r.age === 55;
+    const isFinal = i === rows.length - 1;
+    const cls = isFinal ? 'final-row' : (isMile ? 'milestone' : '');
+    html += `<tr class="${cls}">
+      <td class="year-cell">${r.year}</td>
+      <td class="age-cell">${r.age}</td>
+      <td>${fmtCell(r.totalCpfIn)}</td>
+      <td>${fmtCell(r.oaContrib)}</td>
+      <td>${fmtCell(r.oaInterest)}</td>
+      <td>${fmtCell(r.oaEnd)}</td>
+      <td>${fmtCell(r.saContrib)}</td>
+      <td>${fmtCell(r.saEnd)}</td>
+      <td>${fmtCell(r.maTopup)}</td>
+      <td>${fmtCell(r.maEnd)}</td>
+      <td>${fmtCell(r.srsContrib)}</td>
+      <td>${fmtCell(r.srsEnd)}</td>
+      <td>${fmtCell(r.spIn)}</td>
+      <td>${fmtCell(r.spEnd)}</td>
+      <td class="total-col">${fmtCell(r.yearTotal)}</td>
+      <td>${fmtCell(r.cumCashOut)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+function renderTrajectory(rowsA, rowsB, includeB) {
+  const svg = document.getElementById('trajectory-chart');
+  const W = 800, H = 360;
+  const M = { t: 20, r: 30, b: 50, l: 70 };
+  const innerW = W - M.l - M.r, innerH = H - M.t - M.b;
+  if (!rowsA.length) {
+    svg.innerHTML = '<text x="400" y="180" text-anchor="middle" fill="#7A8395" font-family="Inter Tight">No projection</text>';
+    return;
+  }
+  const data = rowsA.map((r, i) => {
+    let total = r.yearTotal;
+    if (includeB && rowsB[i]) total += rowsB[i].yearTotal;
+    return { age: r.age, total };
+  });
+  if (data.length < 2) {
+    svg.innerHTML = '<text x="400" y="180" text-anchor="middle" fill="#7A8395" font-family="Inter Tight">Need more years</text>';
+    return;
+  }
+  const xMin = data[0].age, xMax = data[data.length-1].age;
+  const yMax = Math.max(...data.map(d => d.total)) * 1.05;
+  const yMin = 0;
+  const x = a => M.l + (a - xMin) / (xMax - xMin) * innerW;
+  const y = v => M.t + innerH - (v - yMin) / (yMax - yMin) * innerH;
+  let h = '';
+  for (let i = 0; i <= 5; i++) {
+    const v = yMin + (yMax - yMin) * i / 5;
+    const yPos = y(v);
+    h += `<line x1="${M.l}" y1="${yPos}" x2="${W-M.r}" y2="${yPos}" stroke="#E8EBF0" stroke-width="1"/>`;
+    const label = v >= 1e6 ? '$' + (v/1e6).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'k';
+    h += `<text x="${M.l - 8}" y="${yPos + 4}" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#7A8395">${label}</text>`;
+  }
+  for (let a = Math.ceil(xMin/5)*5; a <= xMax; a += 5) {
+    const xPos = x(a);
+    h += `<line x1="${xPos}" y1="${M.t + innerH}" x2="${xPos}" y2="${M.t + innerH + 5}" stroke="#7A8395" stroke-width="1"/>`;
+    h += `<text x="${xPos}" y="${M.t + innerH + 20}" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#4B5567">${a}</text>`;
+  }
+  h += `<text x="${M.l + innerW/2}" y="${H - 12}" text-anchor="middle" font-family="Inter Tight" font-size="11" font-weight="600" fill="#7A8395" letter-spacing="1.5">AGE</text>`;
+  let path = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${x(d.age)} ${y(d.total)}`).join(' ');
+  const areaPath = path + ` L ${x(xMax)} ${y(0)} L ${x(xMin)} ${y(0)} Z`;
+  h += `<defs><linearGradient id="trajGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#1F5DC4" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#1F5DC4" stop-opacity="0"/></linearGradient></defs>`;
+  h += `<path d="${areaPath}" fill="url(#trajGrad)"/>`;
+  h += `<path d="${path}" fill="none" stroke="#0B2D5B" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const milestone = data.find(d => d.age === 55);
+  if (milestone) {
+    h += `<line x1="${x(55)}" y1="${M.t}" x2="${x(55)}" y2="${M.t + innerH}" stroke="#B8924A" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>`;
+    h += `<circle cx="${x(55)}" cy="${y(milestone.total)}" r="5" fill="#B8924A" stroke="white" stroke-width="2"/>`;
+    h += `<text x="${x(55) + 10}" y="${y(milestone.total) - 8}" font-family="Fraunces" font-style="italic" font-size="12" fill="#8C6B2C">55 · ERS milestone</text>`;
+  }
+  const last = data[data.length-1];
+  h += `<circle cx="${x(last.age)}" cy="${y(last.total)}" r="5" fill="#0B2D5B"/>`;
+  h += `<text x="${x(last.age) - 8}" y="${y(last.total) - 12}" text-anchor="end" font-family="Fraunces" font-weight="600" font-size="14" fill="#0B2D5B">$${(last.total/1e6).toFixed(2)}M</text>`;
+  svg.innerHTML = h;
+}
+
+function renderBreakdown(rowsA, rowsB, includeB) {
+  const svg = document.getElementById('breakdown-chart');
+  if (!rowsA.length) { svg.innerHTML = ''; return; }
+  const last = rowsA[rowsA.length - 1];
+  const lastB = includeB && rowsB.length ? rowsB[rowsB.length - 1] : null;
+  const items = [
+    { label: 'CPF OA',  val: last.oaEnd  + (lastB ? lastB.oaEnd : 0),  color: '#1F5DC4' },
+    { label: 'CPF RA',  val: last.saEnd  + (lastB ? lastB.saEnd : 0),  color: '#0B2D5B' },
+    { label: 'MediSave',val: last.maEnd  + (lastB ? lastB.maEnd : 0),  color: '#143D7A' },
+    { label: 'SRS',     val: last.srsEnd + (lastB ? lastB.srsEnd : 0), color: '#B8924A' },
+    { label: 'S&P 500', val: last.spEnd  + (lastB ? lastB.spEnd : 0),  color: '#8C6B2C' },
+  ];
+  const total = items.reduce((s, x) => s + x.val, 0);
+  if (total <= 0) { svg.innerHTML = ''; return; }
+  const cx = 140, cy = 140, r = 100;
+  let angle = -Math.PI/2, h = '';
+  items.forEach(item => {
+    const slice = (item.val / total) * Math.PI * 2;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    angle += slice;
+    const x2 = cx + r * Math.cos(angle);
+    const y2 = cy + r * Math.sin(angle);
+    const large = slice > Math.PI ? 1 : 0;
+    h += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${item.color}" stroke="white" stroke-width="2"/>`;
+  });
+  h += `<circle cx="${cx}" cy="${cy}" r="60" fill="white"/>`;
+  h += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7A8395" letter-spacing="1">TOTAL</text>`;
+  h += `<text x="${cx}" y="${cy + 14}" text-anchor="middle" font-family="Fraunces" font-weight="600" font-size="16" fill="#0B2D5B">$${(total/1e6).toFixed(2)}M</text>`;
+  let ly = 290;
+  items.forEach(item => {
+    const pct = (item.val / total * 100).toFixed(1);
+    h += `<rect x="20" y="${ly - 6}" width="10" height="10" fill="${item.color}"/>`;
+    h += `<text x="36" y="${ly + 2}" font-family="Inter Tight" font-size="11" fill="#1A1F2C">${item.label}</text>`;
+    h += `<text x="300" y="${ly + 2}" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#4B5567">${pct}%</text>`;
+    ly += 16;
+  });
+  svg.setAttribute('viewBox', '0 0 320 380');
+  svg.innerHTML = h;
+}
+
+// ============================================================
+// SENSITIVITY (base bucket only)
+// ============================================================
+function renderSensitivity(personA, personB, includeB) {
+  const tbody = document.getElementById('sens-body');
+  if (!tbody) return;
+  const currentBase = personA.spBaseRate;
+  const ratesTest = [0.06, 0.08, 0.10, 0.12];
+  const baselineRows = projectPerson({...personA, spBaseRate: 0.08});
+  const baselineRowsB = includeB ? projectPerson({...personB, spBaseRate: 0.08}) : [];
+  const baseline8 = (baselineRows.length ? baselineRows[baselineRows.length-1].yearTotal : 0)
+                  + (baselineRowsB.length ? baselineRowsB[baselineRowsB.length-1].yearTotal : 0);
+  let html = '';
+  ratesTest.forEach(rate => {
+    const a = projectPerson({...personA, spBaseRate: rate});
+    const b = includeB ? projectPerson({...personB, spBaseRate: rate}) : [];
+    const total = (a.length ? a[a.length-1].yearTotal : 0) + (b.length ? b[b.length-1].yearTotal : 0);
+    const delta = total - baseline8;
+    const mult = baseline8 ? total / baseline8 : 0;
+    const isCurrent = Math.abs(rate - currentBase) < 0.001;
+    html += `<tr ${isCurrent ? 'class="current-rate"' : ''}>
+      <td>${(rate*100).toFixed(0)}%</td>
+      <td>$${fmt$(total)}</td>
+      <td>${delta >= 0 ? '+' : '−'}$${fmt$(Math.abs(delta))}</td>
+      <td>${mult.toFixed(2)}×</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ============================================================
+// AUDIT
+// ============================================================
+function buildReconciliationBlock(rows, person) {
+  const startWealth = person.oaStart + person.saStart + person.maStart + person.srsStart + person.spStart;
+  let totalCpfIn = 0, total55Topup = 0, totalMaTopup = 0, totalRefund = 0, totalSrsContrib = 0;
+  let totalL5 = 0, totalL6 = 0, totalL7 = 0;
+  let totalMortgage = 0, totalInterest = 0;
+  let totalOaInt = 0, totalSaInt = 0, totalMaInt = 0, totalSrsGrowth = 0, totalSpGrowth = 0;
+  let endWealth = 0;
+  rows.forEach((r, i) => {
+    totalCpfIn += r.statutoryContrib + r.l2Extra;
+    if (r.age === 55) total55Topup += person.topup55;
+    totalMaTopup += r.maTopup;
+    totalRefund += r.refund;
+    totalSrsContrib += r.srsContrib;
+    totalL5 += r.l5Topup;
+    totalL6 += r.l6Contrib;
+    totalL7 += r.l7Contrib;
+    totalMortgage += r.mortgage;
+    totalOaInt += r.oaInterest;
+    totalSaInt += r.saInterest;
+    totalMaInt += r.maInterest;
+    totalSrsGrowth += r.srsGrowth;
+    totalSpGrowth += r.spGrowth;
+    if (i === rows.length - 1) endWealth = r.yearTotal;
+  });
+  totalInterest = totalOaInt + totalSaInt + totalMaInt + totalSrsGrowth + totalSpGrowth;
+  const expected = startWealth + totalCpfIn + total55Topup + totalMaTopup + totalRefund + totalSrsContrib
+                 + totalL5 + totalL6 + totalL7 - totalMortgage + totalInterest;
+  const diff = expected - endWealth;
+
+  // Determine bucket return rate strings for SRS / S&P breakdown
+  const baseRatePct = (person.spBaseRate * 100).toFixed(0);
+  const crashRatePct = (person.spCrashRate * 100).toFixed(0);
+  const spCrashFracPct = (person.spCrashFrac * 100).toFixed(0);
+  const srsCrashFracPct = (person.srsCrashFrac * 100).toFixed(0);
+
+  // Build the interest breakdown sub-table
+  const interestBreakdownHtml = `
+    <div class="interest-detail">
+      <div class="interest-detail-header">How the $${fmt$(totalInterest)} of interest &amp; growth is computed</div>
+
+      <div class="interest-detail-row">
+        <div class="interest-detail-name">
+          <strong>OA interest</strong> · 2.5% per year, every year
+          <div class="interest-detail-formula">Each year: <code>prior OA balance × 0.025</code> — earned across all ${rows.length} projected years</div>
+        </div>
+        <div class="interest-detail-value">$${fmt$(totalOaInt)}</div>
+      </div>
+
+      <div class="interest-detail-row">
+        <div class="interest-detail-name">
+          <strong>SA / RA tiered interest</strong> · 4% to 6% depending on phase
+          <div class="interest-detail-formula">
+            Pre-55 (SA): <code>min(SA, $60K) × 0.05 + max(SA − $60K, 0) × 0.04</code><br>
+            Post-55 (RA): <code>min(RA, $30K) × 0.06 + min(max(RA−$30K, 0), $30K) × 0.05 + max(RA−$60K, 0) × 0.04</code>
+          </div>
+        </div>
+        <div class="interest-detail-value">$${fmt$(totalSaInt)}</div>
+      </div>
+
+      <div class="interest-detail-row">
+        <div class="interest-detail-name">
+          <strong>MA interest</strong> · 4% per year, capped at BHS
+          <div class="interest-detail-formula">Each year: <code>prior MA balance × 0.04</code>. When MA + interest exceeds BHS, the excess overflows to OA.</div>
+        </div>
+        <div class="interest-detail-value">$${fmt$(totalMaInt)}</div>
+      </div>
+
+      <div class="interest-detail-row">
+        <div class="interest-detail-name">
+          <strong>SRS investment growth</strong> · two-bucket
+          <div class="interest-detail-formula">
+            Base bucket (${100 - srsCrashFracPct}% of SRS) × ${baseRatePct}% + Crash buying bucket (${srsCrashFracPct}% of SRS) × ${crashRatePct}%<br>
+            Each year: <code>balance × bucket-rate</code>, compounding annually.
+          </div>
+        </div>
+        <div class="interest-detail-value">$${fmt$(totalSrsGrowth)}</div>
+      </div>
+
+      <div class="interest-detail-row">
+        <div class="interest-detail-name">
+          <strong>CPF-invested S&amp;P 500 growth</strong> · two-bucket
+          <div class="interest-detail-formula">
+            Base bucket (${100 - spCrashFracPct}% of holdings) × ${baseRatePct}% + Crash buying bucket (${spCrashFracPct}% of holdings) × ${crashRatePct}%<br>
+            Each year: <code>balance × bucket-rate</code>, compounding annually.
+          </div>
+        </div>
+        <div class="interest-detail-value">$${fmt$(totalSpGrowth)}</div>
+      </div>
+
+      <div class="interest-detail-row total">
+        <div class="interest-detail-name"><strong>Total interest &amp; growth</strong></div>
+        <div class="interest-detail-value">$${fmt$(totalInterest)}</div>
+      </div>
+    </div>
+  `;
+
+  return {
+    diff,
+    html: `
+      <div class="audit-row"><span class="audit-row-label">Starting wealth</span><span class="audit-row-value">$${fmt$(startWealth)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ Statutory CPF + L2 extra</span><span class="audit-row-value">$${fmt$(totalCpfIn)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ 55 Cash Top-up</span><span class="audit-row-value">$${fmt$(total55Topup)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ MA Top-ups (L1)</span><span class="audit-row-value">$${fmt$(totalMaTopup)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ Voluntary refund (L3)</span><span class="audit-row-value">$${fmt$(totalRefund)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ SA RSTU (L6)</span><span class="audit-row-value">$${fmt$(totalL6)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ Post-55 voluntary $37,740 fill (L5)</span><span class="audit-row-value">$${fmt$(totalL5)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ Annual ERS top-ups (L7)</span><span class="audit-row-value">$${fmt$(totalL7)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">+ SRS contributions</span><span class="audit-row-value">$${fmt$(totalSrsContrib)}</span></div>
+      <div class="audit-row"><span class="audit-row-label">− Mortgage out</span><span class="audit-row-value">−$${fmt$(totalMortgage)}</span></div>
+      <div class="audit-row interest-row">
+        <span class="audit-row-label">+ All interest &amp; growth <span class="info-icon">▾</span></span>
+        <span class="audit-row-value">$${fmt$(totalInterest)}</span>
+      </div>
+      ${interestBreakdownHtml}
+      <div class="audit-row total"><span class="audit-row-label">Expected ending wealth</span><span class="audit-row-value">$${fmt$(expected)}</span></div>
+      <div class="audit-row total"><span class="audit-row-label">Actual ending wealth</span><span class="audit-row-value">$${fmt$(endWealth)}</span></div>
+      <div class="audit-row total" style="border-top: 1px solid var(--gold) !important;">
+        <span class="audit-row-label">Reconciliation difference</span>
+        <span class="audit-row-value">${Math.abs(diff) < 1 ? '<span class="check-pill">$0 — TIES</span>' : '<span class="check-pill fail">$' + fmt$(diff, 2) + '</span>'}</span>
+      </div>
+    `
+  };
+}
+
+function renderAudit(rowsA, personA, rowsB, personB, includeB) {
+  // Person A reconciliation
+  const blockA = buildReconciliationBlock(rowsA, personA);
+  document.getElementById('audit-recon-a').innerHTML = blockA.html;
+
+  // Person B reconciliation
+  let blockB = { diff: 0 };
+  const reconBContainer = document.getElementById('audit-recon-b-block');
+  if (includeB && rowsB.length > 0) {
+    blockB = buildReconciliationBlock(rowsB, personB);
+    document.getElementById('audit-recon-b').innerHTML = blockB.html;
+    reconBContainer.style.display = '';
+  } else {
+    reconBContainer.style.display = 'none';
+  }
+
+  // Integrity checks — run across both persons (or just A if no spouse)
+  const allRowSets = [{ rows: rowsA, person: personA, label: 'A' }];
+  if (includeB && rowsB.length > 0) allRowSets.push({ rows: rowsB, person: personB, label: 'B' });
+
+  const checks = [];
+
+  // Pre-55 contribution accounting
+  let pre55Imbalance = 0;
+  allRowSets.forEach(set => {
+    set.rows.forEach(r => {
+      if (r.age < 55) {
+        const expected = r.statutoryContrib + r.l2Extra + r.l6Contrib;
+        const actual = r.oaContrib + r.saContrib + r.maContrib;
+        pre55Imbalance += Math.abs(expected - actual);
+      }
+    });
+  });
+  checks.push({ label: 'Pre-55 contribution accounting', pass: pre55Imbalance < 1, val: '$' + fmt$(pre55Imbalance, 2) });
+
+  // Post-55 SA sum
+  let post55SaSumWithoutLevers = 0;
+  allRowSets.forEach(set => {
+    set.rows.forEach(r => {
+      if (r.age > 55 && r.age <= 64) {
+        const leverContribs = (r.l5Topup * ALLOC_BANDS[ALLOC_BANDS.length-1][2]) + r.l7Contrib;
+        post55SaSumWithoutLevers += Math.abs(r.saContrib - leverContribs);
+      }
+    });
+  });
+  checks.push({ label: 'Post-55 SA = L5 + L7 only', pass: post55SaSumWithoutLevers < 1, val: '$' + fmt$(post55SaSumWithoutLevers, 2) });
+
+  // MA cap
+  let maViolations = 0;
+  allRowSets.forEach(set => set.rows.forEach(r => { if (r.maEnd > r.bhsLimit + 1) maViolations++; }));
+  checks.push({ label: 'MA End ≤ BHS, every year', pass: maViolations === 0, val: maViolations + ' violation(s)' });
+
+  // OA non-negative
+  let oaNeg = 0;
+  allRowSets.forEach(set => set.rows.forEach(r => { if (r.oaEnd < -0.01) oaNeg++; }));
+  checks.push({ label: 'OA never goes negative', pass: oaNeg === 0, val: oaNeg + ' violation(s)' });
+
+  // L4 buffer
+  let l4Violations = 0;
+  allRowSets.forEach(set => {
+    set.rows.forEach(r => {
+      if (r.oaToSp > 0) {
+        const oaBefore = r.oaStart + r.oaContrib + r.maOverflowToOa + r.oaInterest + r.adjIn55 + r.refund - r.mortgage - r.oaToSp;
+        if (oaBefore < OA_BUFFER_FOR_SP - 0.01) l4Violations++;
+      }
+    });
+  });
+  checks.push({ label: 'L4 keeps OA ≥ $20K buffer', pass: l4Violations === 0, val: l4Violations + ' violation(s)' });
+
+  let ersOk = true;
+  if (rowsA.length >= 2) ersOk = Math.abs(rowsA[1].ersLimit / rowsA[0].ersLimit - 1.035) < 0.0001;
+  checks.push({ label: 'ERS grows at 3.5%/year', pass: ersOk, val: '3.5%' });
+
+  let bhsOk = true;
+  if (rowsA.length >= 2) bhsOk = Math.abs(rowsA[1].bhsLimit / rowsA[0].bhsLimit - 1.045) < 0.0001;
+  checks.push({ label: 'BHS grows at 4.5%/year', pass: bhsOk, val: '4.5%' });
+
+  // L5 sanity
+  let l5SanityFails = 0;
+  allRowSets.forEach(set => {
+    set.rows.forEach(r => {
+      if (r.age >= 55 && r.age <= 64 && set.person.l5) {
+        const sum = r.statutoryContrib + r.l5Topup;
+        if (Math.abs(sum - CPF_ANNUAL_LIMIT) > 1) l5SanityFails++;
+      }
+    });
+  });
+  checks.push({ label: 'L5 ON: statutory + L5 = $37,740 post-55', pass: l5SanityFails === 0, val: l5SanityFails + ' violation(s)' });
+
+  let checksHtml = '';
+  checks.forEach(c => {
+    checksHtml += `<div class="audit-row">
+      <span class="audit-row-label">${c.label}</span>
+      <span><span class="audit-row-value" style="margin-right:10px;color:var(--ink-soft)">${c.val}</span><span class="check-pill ${c.pass ? '' : 'fail'}">${c.pass ? 'PASS' : 'FAIL'}</span></span>
+    </div>`;
+  });
+  document.getElementById('audit-checks').innerHTML = checksHtml;
+
+  const reconciliationFail = (Math.abs(blockA.diff) > 1) || (includeB && Math.abs(blockB.diff) > 1);
+  const failed = checks.filter(c => !c.pass).length + (reconciliationFail ? 1 : 0);
+  const overall = document.getElementById('overall-status');
+  const overallText = document.getElementById('overall-text');
+  if (failed === 0) {
+    overall.classList.remove('has-fail');
+    overallText.textContent = `✓ All ${checks.length + 1} checks pass`;
+  } else {
+    overall.classList.add('has-fail');
+    overallText.textContent = `✗ ${failed} check(s) failed`;
+  }
+}
+
+// ============================================================
+// MAIN RECALC
+// ============================================================
+let recalcTimer = null;
+function recalc() {
+  if (recalcTimer) clearTimeout(recalcTimer);
+  recalcTimer = setTimeout(_recalc, 30);
+}
+function _recalc() {
+  const includeB = document.getElementById('include-spouse').checked;
+  document.getElementById('spouse-state').textContent = includeB ? 'On' : 'Off';
+  document.getElementById('spouse-state').classList.toggle('on', includeB);
+
+  const personA = readPerson('a');
+  const personB = readPerson('b');
+  const rowsA = projectPerson(personA);
+  const rowsB = includeB ? projectPerson(personB) : [];
+
+  const startA = personA.oaStart + personA.saStart + personA.maStart + personA.srsStart + personA.spStart;
+  const startB = includeB ? (personB.oaStart + personB.saStart + personB.maStart + personB.srsStart + personB.spStart) : 0;
+  const startTotal = startA + startB;
+  const endA = rowsA.length ? rowsA[rowsA.length-1].yearTotal : 0;
+  const endB = rowsB.length ? rowsB[rowsB.length-1].yearTotal : 0;
+  const endTotal = endA + endB;
+  const cashA = rowsA.length ? rowsA[rowsA.length-1].cumCashOut : 0;
+  const cashB = rowsB.length ? rowsB[rowsB.length-1].cumCashOut : 0;
+  const cashTotal = cashA + cashB;
+  const yrs = personA.endAge - personA.currentAge;
+  const cagr = (yrs > 0 && startTotal > 0) ? Math.pow(endTotal/startTotal, 1/yrs) - 1 : 0;
+  const mult = startTotal > 0 ? endTotal / startTotal : 0;
+
+  document.getElementById('hl-total-num').textContent = fmt$(endTotal);
+  document.getElementById('hl-cagr').textContent = fmtPct(cagr);
+  document.getElementById('hl-cash').textContent = fmt$(cashTotal);
+  document.getElementById('hl-start').textContent = fmt$(startTotal);
+  document.getElementById('hl-multiplier').textContent = mult.toFixed(2) + '× your starting wealth';
+  document.getElementById('hl-years').textContent = `over ${yrs} years`;
+
+  const hlNum = document.getElementById('hl-total-num');
+  hlNum.classList.remove('pulse');
+  void hlNum.offsetWidth;
+  hlNum.classList.add('pulse');
+
+  renderProjection(rowsA, 'proj-body-a');
+  renderProjection(rowsB, 'proj-body-b');
+  renderTrajectory(rowsA, rowsB, includeB);
+  renderBreakdown(rowsA, rowsB, includeB);
+  renderSensitivity(personA, personB, includeB);
+  renderAudit(rowsA, personA, rowsB, personB, includeB);
+}
+
+// ============================================================
+// UI HOOKS
+// ============================================================
+function toggleSpouse() {
+  const on = document.getElementById('include-spouse').checked;
+  document.querySelectorAll('.spouse-section').forEach(el => el.classList.toggle('visible', on));
+  document.getElementById('tab-b').style.display = on ? 'block' : 'none';
+  if (!on) {
+    document.getElementById('proj-b').classList.remove('active');
+    document.getElementById('proj-a').classList.add('active');
+    document.querySelectorAll('#proj-tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('#proj-tabs .tab[data-target="proj-a"]').classList.add('active');
+  }
+}
+
+document.querySelectorAll('#proj-tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#proj-tabs .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.proj-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.target).classList.add('active');
+  });
+});
+
+function setupReturnPills(containerId) {
+  document.querySelectorAll('#' + containerId + ' .return-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#' + containerId + ' .return-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      recalc();
+    });
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset all inputs to defaults?')) return;
+  window.location.reload();
+}
+
+// ============================================================
+// XLSX EXPORT — generate a fully formulaic workbook from current inputs
+// Live formulas, not pasted values. Excel recomputes everything on open.
+// ============================================================
+
+function downloadProjectionXlsx() {
+  if (typeof XLSX === 'undefined') {
+    alert('The Excel-export library is still loading. Please wait a moment and try again.');
+    return;
+  }
+
+  const includeB = document.getElementById('include-spouse').checked;
+  const personA = readPerson('a');
+  const personB = includeB ? readPerson('b') : null;
+
+  const wb = XLSX.utils.book_new();
+
+  // ===== Sheet 1: Read Me =====
+  const readme = [
+    ['CPF Cry$tal Ball — Projection Workbook'],
+    [],
+    ['What this workbook is'],
+    ['A complete, formula-driven retirement projection. Every cell with a formula is live — change any input on the Inputs sheet and Excel will recompute everything automatically.'],
+    [],
+    ['How it is organised'],
+    ['Inputs           Your personal inputs. Every editable assumption lives here.'],
+    ['Constants        Singapore CPF official 2026 values, allocation tables, interest rates. Treat as read-only.'],
+    ['Projection (A)   Year-by-year projection for Person A. Every cell is a formula.'],
+    [includeB ? 'Projection (B)   Year-by-year projection for Person B. Every cell is a formula.' : '(Projection B not generated — spouse toggle was off when you exported.)'],
+    ['Reconciliation   Validates that starting wealth + every flow + interest = ending wealth, to the dollar.'],
+    [],
+    ['Methodology notes'],
+    ['• Calibrated to official 2026 Singapore CPF rules and values.'],
+    ['• Pre-55: $37,740 annual contribution splits across OA / SA / MA per official age-band allocation.'],
+    ['• Post-55: statutory contribution falls (32.5% then 22.5%); Lever 5 voluntarily fills the gap to $37,740.'],
+    ['• At age 55: SA up to FRS becomes RA. SA above FRS overflows to OA.'],
+    ['• MA caps at BHS each year. Excess interest overflows to OA pre-55, RA-then-OA post-55.'],
+    ['• OA→S&P 500 transfers (Lever 4) keep at least $20K in OA.'],
+    ['• Equity (CPF→S&P and SRS) splits into a base bucket and a Crash Buying Bucket, each compounding at its own user-set rate.'],
+    [],
+    ['Important — limitations'],
+    ['This workbook models the same simplifications as the on-screen simulator: no salary growth, no drawdown phase, no tax-savings modelling, no Monte Carlo on equity returns. Crash buying is modelled as a separate bucket with a higher compound rate, not as time-varying market events.'],
+    [],
+    ['Errors and acceptance'],
+    ['By using this workbook you accept that despite our care to model official 2026 CPF rules accurately, errors may exist. The numbers here are educational estimates, not financial advice. Always verify with the CPF Board for your own circumstances before making decisions.'],
+    [],
+    [`Generated: ${new Date().toLocaleString('en-SG', { timeZone: 'Asia/Singapore' })}`],
+  ];
+  const wsRead = XLSX.utils.aoa_to_sheet(readme);
+  wsRead['!cols'] = [{ wch: 110 }];
+  // Bold headers
+  ['A1', 'A3', 'A6', 'A13', 'A22', 'A25'].forEach(addr => {
+    if (wsRead[addr]) wsRead[addr].s = { font: { bold: true } };
+  });
+  XLSX.utils.book_append_sheet(wb, wsRead, 'Read Me');
+
+  // ===== Sheet 2: Inputs =====
+  const inputsRows = [
+    ['Person A inputs', '', 'Person B inputs', ''],
+    ['Current age', personA.currentAge, 'Current age', includeB ? personB.currentAge : ''],
+    ['Project end age', personA.endAge, 'Project end age', includeB ? personB.endAge : ''],
+    ['Starting year', personA.startYear, 'Starting year', includeB ? personB.startYear : ''],
+    ['', '', '', ''],
+    ['Starting balances', '', 'Starting balances', ''],
+    ['OA', personA.oaStart, 'OA', includeB ? personB.oaStart : 0],
+    ['SA', personA.saStart, 'SA', includeB ? personB.saStart : 0],
+    ['MA', personA.maStart, 'MA', includeB ? personB.maStart : 0],
+    ['CPF→S&P', personA.spStart, 'CPF→S&P', includeB ? personB.spStart : 0],
+    ['SRS', personA.srsStart, 'SRS', includeB ? personB.srsStart : 0],
+    ['', '', '', ''],
+    ['Contributions', '', 'Contributions', ''],
+    ['Annual CPF contribution', personA.cpfContrib, 'Annual CPF contribution', includeB ? personB.cpfContrib : 0],
+    ['Stop work age', personA.stopWork, 'Stop work age', includeB ? personB.stopWork : 0],
+    ['55 cash top-up', personA.topup55, '55 cash top-up', includeB ? personB.topup55 : 0],
+    ['SRS contribution', personA.srsContrib, 'SRS contribution', includeB ? personB.srsContrib : 0],
+    ['Stop SRS age', personA.stopSrs, 'Stop SRS age', includeB ? personB.stopSrs : 0],
+    ['Monthly mortgage', personA.mortgage, 'Monthly mortgage', includeB ? personB.mortgage : 0],
+    ['Mortgage end age', personA.mortEnd, 'Mortgage end age', includeB ? personB.mortEnd : 0],
+    ['', '', '', ''],
+    ['Equity bucket settings', '', '', ''],
+    ['Base bucket return rate', personA.spBaseRate, '', ''],
+    ['Crash buying bucket rate', personA.spCrashRate, '', ''],
+    ['CPF→S&P crash bucket %', personA.spCrashFrac, '', ''],
+    ['SRS crash bucket %', personA.srsCrashFrac, '', ''],
+    ['', '', '', ''],
+    ['Levers (1 = on, 0 = off)', '', 'Levers (1 = on, 0 = off)', ''],
+    ['L1 - MA top-ups to BHS', personA.l1 ? 1 : 0, 'L1', includeB ? (personB.l1 ? 1 : 0) : 0],
+    ['L2 - extra income/CPF (toggle)', personA.l2 ? 1 : 0, 'L2', includeB ? (personB.l2 ? 1 : 0) : 0],
+    ['L2 - extra annual amount', personA.l2Amt, 'L2 amount', includeB ? personB.l2Amt : 0],
+    ['L3 - housing refund (toggle)', personA.l3 ? 1 : 0, 'L3', includeB ? (personB.l3 ? 1 : 0) : 0],
+    ['L3 - refund amount', personA.l3Amt, 'L3 amount', includeB ? personB.l3Amt : 0],
+    ['L3 - refund age', personA.l3Age, 'L3 age', includeB ? personB.l3Age : 0],
+    ['L4 - OA→S&P (toggle)', personA.l4 ? 1 : 0, 'L4', includeB ? (personB.l4 ? 1 : 0) : 0],
+    ['L4 - annual transfer', personA.l4Amt, 'L4 amount', includeB ? personB.l4Amt : 0],
+    ['L5 - voluntary $37,740 post-55', personA.l5 ? 1 : 0, 'L5', includeB ? (personB.l5 ? 1 : 0) : 0],
+    ['L6 - SA RSTU (toggle)', personA.l6 ? 1 : 0, 'L6', includeB ? (personB.l6 ? 1 : 0) : 0],
+    ['L6 - annual amount', personA.l6Amt, 'L6 amount', includeB ? personB.l6Amt : 0],
+    ['L7 - annual ERS top-up', personA.l7 ? 1 : 0, 'L7', includeB ? (personB.l7 ? 1 : 0) : 0],
+  ];
+  const wsInputs = XLSX.utils.aoa_to_sheet(inputsRows);
+  wsInputs['!cols'] = [{ wch: 32 }, { wch: 14 }, { wch: 32 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, wsInputs, 'Inputs');
+
+  // ===== Sheet 3: Constants =====
+  const constants = [
+    ['CPF official 2026 constants'],
+    ['Constant', 'Value', 'Notes'],
+    ['FRS 2026', 220400, 'Full Retirement Sum'],
+    ['ERS 2026', 440800, 'Enhanced Retirement Sum'],
+    ['BHS 2026', 79000, 'Basic Healthcare Sum'],
+    ['FRS / ERS growth rate', 0.035, 'Per year'],
+    ['BHS growth rate', 0.045, 'Per year'],
+    ['Base year', 2026, ''],
+    ['CPF Annual Limit', 37740, 'Mandatory + voluntary cap (per employment)'],
+    ['CPF salary ceiling', 102000, 'Annual; controls statutory rate × ceiling = max contrib'],
+    ['OA buffer for S&P investment', 20000, 'Lever 4 keeps OA at or above this'],
+    [],
+    ['Interest rates'],
+    ['OA rate', 0.025, '2.5% per year'],
+    ['SA rate, first $60K', 0.05, '5% on first $60,000'],
+    ['SA rate, above $60K', 0.04, '4% on balance above $60,000'],
+    ['RA tier 1 (first $30K)', 0.06, '6% on first $30,000'],
+    ['RA tier 2 ($30K-$60K)', 0.05, '5% on next $30,000'],
+    ['RA tier 3 (above $60K)', 0.04, '4% on balance above $60,000'],
+    ['MA rate', 0.04, '4% per year'],
+    [],
+    ['Statutory contribution rates by age band'],
+    ['Min age', 'Max age (excl)', 'Total rate'],
+    [0, 55, 0.37],
+    [55, 60, 0.325],
+    [60, 65, 0.225],
+    [65, 70, 0.165],
+    [70, 99, 0.125],
+    [],
+    ['Pre-55 allocation table — % of mandatory contribution by age band'],
+    ['Min age', 'OA share', 'SA share', 'MA share'],
+    [25, 0.6217, 0.1621, 0.2162],
+    [35, 0.5677, 0.1891, 0.2432],
+    [45, 0.5136, 0.2162, 0.2702],
+    [50, 0.4055, 0.3108, 0.2837],
+  ];
+  const wsConst = XLSX.utils.aoa_to_sheet(constants);
+  wsConst['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, wsConst, 'Constants');
+
+  // ===== Build a projection sheet for a person =====
+  // The projection sheet will use formulas that reference Inputs and Constants.
+  // Inputs columns: B = Person A values, D = Person B values.
+  function buildProjectionSheet(person, valueCol, sheetName) {
+    // valueCol: 'B' for Person A, 'D' for Person B
+    const yearStart = person.startYear;
+    const ageStart = person.currentAge;
+    const ageEnd = Math.min(person.endAge, 65);
+    const N = ageEnd - ageStart + 1;
+    if (N <= 0) {
+      const empty = XLSX.utils.aoa_to_sheet([['No projection — check ages']]);
+      XLSX.utils.book_append_sheet(wb, empty, sheetName);
+      return;
+    }
+
+    // Header rows
+    const aoa = [];
+    aoa.push([
+      'Year', 'Age', 'Phase',
+      'Statutory contrib', 'L2 extra', 'L5 voluntary topup', 'L6 SA RSTU', 'L7 ERS topup', 'Total CPF in',
+      'OA contrib', 'OA interest', 'MA overflow → OA', 'Adj in (55)', 'Refund (L3)', 'Mortgage', 'OA→S&P (L4)', 'OA end',
+      'SA contrib', 'SA/RA interest', 'Adj out (55)', 'SA/RA end',
+      'MA contrib', 'MA top-up (L1)', 'MA interest', 'MA overflow', 'MA end',
+      'SRS contrib', 'SRS growth', 'SRS end',
+      'OA→S&P transfer', 'S&P growth', 'S&P end',
+      'Year total', 'Cum cash out',
+      'FRS', 'ERS', 'BHS',
+    ]);
+
+    // Helpers for inputs sheet references
+    // Inputs rows (1-indexed): personA values in column B, personB in column D
+    // Row map for valueCol B (Person A):
+    const I = {
+      currentAge: `Inputs!${valueCol}2`,
+      endAge:     `Inputs!${valueCol}3`,
+      startYear:  `Inputs!${valueCol}4`,
+      oaStart:    `Inputs!${valueCol}7`,
+      saStart:    `Inputs!${valueCol}8`,
+      maStart:    `Inputs!${valueCol}9`,
+      spStart:    `Inputs!${valueCol}10`,
+      srsStart:   `Inputs!${valueCol}11`,
+      cpfContrib: `Inputs!${valueCol}14`,
+      stopWork:   `Inputs!${valueCol}15`,
+      topup55:    `Inputs!${valueCol}16`,
+      srsContrib: `Inputs!${valueCol}17`,
+      stopSrs:    `Inputs!${valueCol}18`,
+      mortgage:   `Inputs!${valueCol}19`,
+      mortEnd:    `Inputs!${valueCol}20`,
+      // Equity rates always column B
+      spBaseRate:  `Inputs!B23`,
+      spCrashRate: `Inputs!B24`,
+      spCrashFrac: `Inputs!B25`,
+      srsCrashFrac:`Inputs!B26`,
+      // Levers
+      l1:    `Inputs!${valueCol}29`,
+      l2:    `Inputs!${valueCol}30`,
+      l2Amt: `Inputs!${valueCol}31`,
+      l3:    `Inputs!${valueCol}32`,
+      l3Amt: `Inputs!${valueCol}33`,
+      l3Age: `Inputs!${valueCol}34`,
+      l4:    `Inputs!${valueCol}35`,
+      l4Amt: `Inputs!${valueCol}36`,
+      l5:    `Inputs!${valueCol}37`,
+      l6:    `Inputs!${valueCol}38`,
+      l6Amt: `Inputs!${valueCol}39`,
+      l7:    `Inputs!${valueCol}40`,
+    };
+
+    const C = {
+      FRS:        `Constants!B3`,
+      ERS:        `Constants!B4`,
+      BHS:        `Constants!B5`,
+      FRS_GROWTH: `Constants!B6`,
+      BHS_GROWTH: `Constants!B7`,
+      BASE_YEAR:  `Constants!B8`,
+      CPF_LIMIT:  `Constants!B9`,
+      CEILING:    `Constants!B10`,
+      OA_BUFFER:  `Constants!B11`,
+      RATE_OA:    `Constants!B14`,
+      RATE_SA_LO: `Constants!B15`,
+      RATE_SA_HI: `Constants!B16`,
+      RATE_RA_T1: `Constants!B17`,
+      RATE_RA_T2: `Constants!B18`,
+      RATE_RA_T3: `Constants!B19`,
+      RATE_MA:    `Constants!B20`,
+      // Statutory rates table: rows 24-28 (B24:D28). Pre-55 row uses C24, etc.
+      // Allocation table: rows 32-35 (A32:D35)
+    };
+
+    // Build N data rows. Each row is row 2..N+1 in the sheet.
+    for (let i = 0; i < N; i++) {
+      const r = i + 2; // sheet row number
+      const prevR = r - 1; // previous row
+      // For year 0 (i=0), prevR is the header row. We use Inputs starting balances directly.
+      const isFirstYear = (i === 0);
+
+      // Year and age
+      const fYear = `=${I.startYear}+${i}`;
+      const fAge  = `=${I.currentAge}+${i}`;
+      const fPhase = `=IF(B${r}<55,"Pre-55","Post-55")`;
+
+      // Statutory contribution
+      // Pre-55: cpfContrib × (age < stopWork)
+      // Post-55: min(cpfContrib, ceiling × statutoryRate) × working
+      // Statutory rate: lookup in Constants table B24:C28 by age band
+      const fStatRate = `IF(B${r}<55,${C.CEILING}*Constants!$C$24/${C.CEILING}, ` +
+                       `INDEX(Constants!$C$24:$C$28,MATCH(B${r},Constants!$A$24:$A$28,1)))`;
+      // Working flag: 1 if age < stopWork else 0
+      const fWorking = `IF(B${r}<${I.stopWork},1,0)`;
+      // Statutory: pre-55 = cpfContrib × working; post-55 = min(cpfContrib, ceiling × rate) × working
+      const fStat = `=IF(B${r}<55, ${I.cpfContrib}*${fWorking}, MIN(${I.cpfContrib}, ${C.CEILING}*${fStatRate})*${fWorking})`;
+
+      // L2 extra
+      const fL2 = `=IF(${I.l2}=1, ${I.l2Amt}*${fWorking}, 0)`;
+
+      // L5 voluntary topup (post-55 only; fills gap to $37,740)
+      const fL5 = `=IF(AND(B${r}>=55,${I.l5}=1,${fWorking}=1), MAX(0, ${C.CPF_LIMIT}-D${r}), 0)`;
+
+      // L6 SA RSTU (pre-55 only; capped at FRS room)
+      const fL6 = `=IF(AND(B${r}<55,${I.l6}=1,${fWorking}=1), MIN(${I.l6Amt}, MAX(0, AI${r}/2 - ${isFirstYear ? I.saStart : 'V' + prevR})), 0)`;
+
+      // L7 ERS top-up (post-55 only; equals year-on-year ERS increase)
+      const fL7 = `=IF(AND(B${r}>=55, ${I.l7}=1, ${fWorking}=1), AI${r} - ${C.ERS}*POWER(1+${C.FRS_GROWTH}, A${r}-${C.BASE_YEAR}-1), 0)`;
+
+      const fTotalIn = `=D${r}+E${r}+F${r}+G${r}+H${r}`;
+
+      // FRS / ERS / BHS limits for this year
+      const fFRS = `=AI${r}/2`;
+      const fERS = `=${C.ERS}*POWER(1+${C.FRS_GROWTH}, A${r}-${C.BASE_YEAR})`;
+      const fBHS = `=${C.BHS}*POWER(1+${C.BHS_GROWTH}, A${r}-${C.BASE_YEAR})`;
+
+      // Allocation lookups (pre-55 only). Use age-50 band post-55 for L5 split.
+      // For simplicity in the sheet, build a helper for each allocation share:
+      const fAllocOA = `INDEX(Constants!$B$32:$B$35,MATCH(B${r},Constants!$A$32:$A$35,1))`;
+      const fAllocSA = `INDEX(Constants!$C$32:$C$35,MATCH(B${r},Constants!$A$32:$A$35,1))`;
+      const fAllocMA = `INDEX(Constants!$D$32:$D$35,MATCH(B${r},Constants!$A$32:$A$35,1))`;
+      // Post-55 L5 template uses age-50 band (last row in allocation table)
+      const fTmplOA = `Constants!$B$35`;
+      const fTmplSA = `Constants!$C$35`;
+      const fTmplMA = `Constants!$D$35`;
+
+      // OA contribution
+      // Pre-55: (statutory + L2) × allocOA
+      // Post-55: statutory + L2 + L5_OA share + L5 SA-overflow to OA
+      // L5 SA-overflow happens when RA can't accept the SA share.
+      // Simplification for the Excel: post-55 OA gets: statutory + L2 + (L5 × OA_share) + (L5 × SA_share if RA at cap)
+      // We compute L5_SA_overflow by checking: would (saPrev + topup55_at_55 + L5*SA_share) exceed ERS?
+      // At age 55: raBaseRoom = min(saPrev, FRS) + topup55. Otherwise: raBaseRoom = saPrev.
+      // Then L5_SA_room = max(0, ERS - raBaseRoom). L5_SA_actual = min(L5*SA_share, room). Overflow = L5*SA_share - L5_SA_actual.
+      // For brevity we write this as a single complex formula:
+      const saPrevRef = isFirstYear ? I.saStart : `V${prevR}`;
+      const fRaBaseRoom = `IF(B${r}=55, MIN(${saPrevRef},AI${r})+${I.topup55}, ${saPrevRef})`;
+      const fL5SaIntent = `F${r}*${fTmplSA}`;
+      const fL5SaActual = `MIN(${fL5SaIntent}, MAX(0, ${C.ERS}*POWER(1+${C.FRS_GROWTH}, A${r}-${C.BASE_YEAR})-${fRaBaseRoom}))`;
+      const fL5SaOverflowToOa = `${fL5SaIntent}-${fL5SaActual}`;
+
+      // OA contrib: pre-55 = (D+E)*allocOA;  post-55 = (D+E) + F*tmplOA + L5_SA_overflow
+      const fOaContrib = `=IF(B${r}<55, (D${r}+E${r})*${fAllocOA}, D${r}+E${r}+F${r}*${fTmplOA}+(${fL5SaOverflowToOa}))`;
+
+      // OA interest
+      const oaPrevRef = isFirstYear ? I.oaStart : `Q${prevR}`;
+      const fOaInterest = `=${oaPrevRef}*${C.RATE_OA}`;
+
+      // Adj in 55 (SA above FRS moves to OA)
+      const fAdjIn55 = `=IF(B${r}=55, MAX(0, ${saPrevRef}-${fFRS.substring(1)}), 0)`;
+
+      // Refund (L3)
+      const fRefund = `=IF(AND(${I.l3}=1, B${r}=${I.l3Age}), ${I.l3Amt}, 0)`;
+
+      // Mortgage
+      const fMortgageAnnual = `IF(B${r}<=${I.mortEnd}, ${I.mortgage}*12, 0)`;
+      // Capped at OA available pre-mortgage. OA pre-mortgage = oaPrev + oaContrib + maOverflow + oaInterest + adjIn + refund
+      // To capture this we use: mortgage = MIN(annual, oaPrev + ...)
+      const fMortgage = `=MIN(${fMortgageAnnual}, ${oaPrevRef}+J${r}+L${r}+K${r}+M${r}+N${r})`;
+
+      // OA→S&P transfer (Lever 4)
+      // = if L4=1, min(L4Amt, max(0, oaAfterMortgage - 20K))
+      // oaAfterMortgage = oaPrev + oaContrib + overflow + interest + adjIn + refund - mortgage
+      const fOaAfterMort = `${oaPrevRef}+J${r}+L${r}+K${r}+M${r}+N${r}-O${r}`;
+      const fOaToSp = `=IF(${I.l4}=1, MIN(${I.l4Amt}, MAX(0, ${fOaAfterMort}-${C.OA_BUFFER})), 0)`;
+
+      // OA end
+      const fOaEnd = `=${oaPrevRef}+J${r}+L${r}+K${r}+M${r}+N${r}-O${r}-P${r}`;
+
+      // SA / RA block
+      // SA contrib pre-55: (D+E)*allocSA + maExcessPre55 + L6
+      // SA contrib at 55: topup55 + L5_SA_actual
+      // SA contrib post-55: L7 + L5_SA_actual
+      // (maExcessPre55 we compute in MA block below; use placeholder X)
+      const fSaContrib = `=IF(B${r}<55, (D${r}+E${r})*${fAllocSA}+X${r}+G${r}, ` +
+                        `IF(B${r}=55, ${I.topup55}+${fL5SaActual}, H${r}+${fL5SaActual}))`;
+
+      // SA interest
+      const fSaInterest = `=IF(B${r}<55, MIN(${saPrevRef},60000)*${C.RATE_SA_LO}+MAX(0,${saPrevRef}-60000)*${C.RATE_SA_HI}, ` +
+        `IF(B${r}=55, ` +
+        `MIN(MIN(${saPrevRef},${fFRS.substring(1)})+${I.topup55},30000)*${C.RATE_RA_T1}+` +
+        `MIN(MAX(MIN(${saPrevRef},${fFRS.substring(1)})+${I.topup55}-30000,0),30000)*${C.RATE_RA_T2}+` +
+        `MAX(MIN(${saPrevRef},${fFRS.substring(1)})+${I.topup55}-60000,0)*${C.RATE_RA_T3}, ` +
+        // Post-55:
+        `MIN(${saPrevRef},30000)*${C.RATE_RA_T1}+` +
+        `MIN(MAX(${saPrevRef}-30000,0),30000)*${C.RATE_RA_T2}+` +
+        `MAX(${saPrevRef}-60000,0)*${C.RATE_RA_T3}))`;
+
+      // Adj out at 55 (SA above FRS removed from SA)
+      const fAdjOut55 = `=IF(B${r}=55, MAX(0, ${saPrevRef}-${fFRS.substring(1)}), 0)`;
+
+      // SA end
+      const fSaEnd = `=IF(B${r}<55, ${saPrevRef}+R${r}+S${r}, IF(B${r}=55, ${saPrevRef}+R${r}+S${r}-T${r}, ${saPrevRef}+R${r}+S${r}))`;
+
+      // MA block
+      const maPrevRef = isFirstYear ? I.maStart : `Z${prevR}`;
+      // MA contrib target pre-55: (D+E) × allocMA. Post-55: L5 × tmplMA.
+      const fMaContribTarget = `IF(B${r}<55, (D${r}+E${r})*${fAllocMA}, F${r}*${fTmplMA})`;
+      // Room: max(0, BHS - maPrev)
+      const fMaRoom = `MAX(0, ${fBHS.substring(1)}-${maPrevRef})`;
+      const fMaContrib = `=MIN(${fMaContribTarget}, ${fMaRoom})`;
+      // MA topup (L1): max(0, BHS - (maPrev + maContrib))
+      const fMaTopup = `=IF(${I.l1}=1, MAX(0, ${fBHS.substring(1)}-(${maPrevRef}+V${r})), 0)`;
+      // MA interest
+      const fMaInterest = `=${maPrevRef}*${C.RATE_MA}`;
+      // MA pre-overflow total
+      const fMaPreOver = `${maPrevRef}+V${r}+W${r}+X${r}`;
+      // MA overflow to OA = max(0, preOver - BHS)
+      const fMaOverflowToOa = `=MAX(0, ${fMaPreOver}-${fBHS.substring(1)})`;
+      // Pre-55 MA excess (when contribTarget > room)
+      const fMaExcessPre55 = `=IF(B${r}<55, MAX(0, ${fMaContribTarget}-${fMaRoom}), 0)`;
+      // MA end = min(BHS, preOver)
+      const fMaEnd = `=MIN(${fBHS.substring(1)}, ${fMaPreOver})`;
+
+      // SRS block
+      const srsPrevRef = isFirstYear ? I.srsStart : `AC${prevR}`;
+      const fSrsContrib = `=IF(B${r}<${I.stopSrs}, ${I.srsContrib}, 0)`;
+      // Two-bucket: srsBaseFrac = 1 - srsCrashFrac
+      // Growth = base × baseRate + crash × crashRate
+      // For simplicity, weighted avg rate × balance (mathematically equivalent for compounding within a year)
+      const fSrsRate = `(1-${I.srsCrashFrac})*${I.spBaseRate}+${I.srsCrashFrac}*${I.spCrashRate}`;
+      const fSrsGrowth = `=${srsPrevRef}*(${fSrsRate})`;
+      const fSrsEnd = `=${srsPrevRef}+AA${r}+AB${r}`;
+
+      // S&P block
+      const spPrevRef = isFirstYear ? I.spStart : `AF${prevR}`;
+      const fSpIn = `=P${r}`;
+      const fSpRate = `(1-${I.spCrashFrac})*${I.spBaseRate}+${I.spCrashFrac}*${I.spCrashRate}`;
+      const fSpGrowth = `=${spPrevRef}*(${fSpRate})`;
+      const fSpEnd = `=${spPrevRef}+AD${r}+AE${r}`;
+
+      // Year total
+      const fYearTotal = `=Q${r}+U${r}+Z${r}+AC${r}+AF${r}`;
+
+      // Cumulative cash out — sum of mortgage + L1 topup + L5 + L6 + L7 + refund + 55 topup
+      const fCashOut55 = `IF(B${r}=55, ${I.topup55}, 0)`;
+      const fAnnualCash = `O${r}+W${r}+F${r}+G${r}+H${r}+N${r}+${fCashOut55}`;
+      const fCumCash = isFirstYear ? `=${fAnnualCash}` : `=AH${prevR}+${fAnnualCash}`;
+
+      aoa.push([
+        fYear, fAge, fPhase,
+        fStat, fL2, fL5, fL6, fL7, fTotalIn,
+        fOaContrib, fOaInterest, fMaOverflowToOa, fAdjIn55, fRefund, fMortgage, fOaToSp, fOaEnd,
+        fSaContrib, fSaInterest, fAdjOut55, fSaEnd,
+        fMaContrib, fMaTopup, fMaInterest, fMaExcessPre55, fMaEnd,
+        fSrsContrib, fSrsGrowth, fSrsEnd,
+        fSpIn, fSpGrowth, fSpEnd,
+        fYearTotal, fCumCash,
+        fFRS, fERS, fBHS,
+      ]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // Column widths and number formats
+    const widths = [
+      { wch: 7 }, { wch: 5 }, { wch: 8 }, // Year, Age, Phase
+      { wch: 13 }, { wch: 11 }, { wch: 12 }, { wch: 11 }, { wch: 11 }, { wch: 12 }, // contribs
+      { wch: 11 }, { wch: 11 }, { wch: 13 }, { wch: 11 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, // OA
+      { wch: 11 }, { wch: 12 }, { wch: 11 }, { wch: 12 }, // SA/RA
+      { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 12 }, { wch: 12 }, // MA
+      { wch: 11 }, { wch: 11 }, { wch: 12 }, // SRS
+      { wch: 12 }, { wch: 11 }, { wch: 12 }, // S&P
+      { wch: 12 }, { wch: 13 }, // year total / cum cash
+      { wch: 11 }, { wch: 11 }, { wch: 11 }, // FRS / ERS / BHS
+    ];
+    ws['!cols'] = widths;
+    // Apply number format $#,##0 to currency columns
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = 1; R <= range.e.r; R++) {
+      for (let C = 0; C <= range.e.c; C++) {
+        if (C >= 3) { // skip Year, Age, Phase
+          const cellAddr = XLSX.utils.encode_cell({ r: R, c: C });
+          if (ws[cellAddr]) ws[cellAddr].z = '$#,##0;[Red]-$#,##0';
+        }
+      }
+    }
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  }
+
+  buildProjectionSheet(personA, 'B', 'Projection (A)');
+  if (includeB && personB) {
+    buildProjectionSheet(personB, 'D', 'Projection (B)');
+  }
+
+  // ===== Sheet: Reconciliation =====
+  // Pull totals from the projection sheets.
+  const lastRowA = (Math.min(personA.endAge, 65) - personA.currentAge + 1) + 1; // header row + N
+  const reconAOA = [
+    ['Wealth reconciliation'],
+    [],
+    ['Person A'],
+    ['Component', 'Amount', 'Formula'],
+    ['Starting wealth', { f: `Inputs!B7+Inputs!B8+Inputs!B9+Inputs!B10+Inputs!B11`, z: '$#,##0' }, 'OA + SA + MA + S&P + SRS at start'],
+    ['+ Statutory CPF + L2 extra', { f: `SUM('Projection (A)'!D2:D${lastRowA})+SUM('Projection (A)'!E2:E${lastRowA})`, z: '$#,##0' }, 'Sum of statutory contributions + L2 extra income'],
+    ['+ 55 cash top-up', { f: `Inputs!B16`, z: '$#,##0' }, 'One-time at age 55, FRS → ERS'],
+    ['+ MA top-ups (L1)', { f: `SUM('Projection (A)'!W2:W${lastRowA})`, z: '$#,##0' }, 'Sum of L1 cash top-ups'],
+    ['+ Voluntary refund (L3)', { f: `SUM('Projection (A)'!N2:N${lastRowA})`, z: '$#,##0' }, 'L3 housing refund into OA'],
+    ['+ SA RSTU (L6)', { f: `SUM('Projection (A)'!G2:G${lastRowA})`, z: '$#,##0' }, 'L6 annual cash to SA pre-55'],
+    ['+ Post-55 voluntary $37,740 fill (L5)', { f: `SUM('Projection (A)'!F2:F${lastRowA})`, z: '$#,##0' }, 'L5 voluntary post-55 cash to fill statutory gap'],
+    ['+ Annual ERS top-ups (L7)', { f: `SUM('Projection (A)'!H2:H${lastRowA})`, z: '$#,##0' }, 'L7 annual ERS-cap-increase top-ups'],
+    ['+ SRS contributions', { f: `SUM('Projection (A)'!AA2:AA${lastRowA})`, z: '$#,##0' }, 'SRS cash contributions'],
+    ['− Mortgage out', { f: `-SUM('Projection (A)'!O2:O${lastRowA})`, z: '$#,##0;[Red]-$#,##0' }, 'OA used for mortgage'],
+    ['+ All interest & growth', { f: `SUM('Projection (A)'!K2:K${lastRowA})+SUM('Projection (A)'!S2:S${lastRowA})+SUM('Projection (A)'!X2:X${lastRowA})+SUM('Projection (A)'!AB2:AB${lastRowA})+SUM('Projection (A)'!AE2:AE${lastRowA})`, z: '$#,##0' }, 'OA + SA/RA + MA + SRS growth + S&P growth'],
+    ['= Expected ending wealth', { f: `B5+B6+B7+B8+B9+B10+B11+B12+B13+B14+B15`, z: '$#,##0' }, 'Sum of all flows'],
+    ['Actual ending wealth (from projection)', { f: `'Projection (A)'!AG${lastRowA}`, z: '$#,##0' }, 'Year total at end age'],
+    ['Reconciliation difference', { f: `B16-B17`, z: '$#,##0;[Red]-$#,##0' }, 'Should be $0'],
+  ];
+
+  const wsRecon = XLSX.utils.aoa_to_sheet(reconAOA);
+  wsRecon['!cols'] = [{ wch: 38 }, { wch: 14 }, { wch: 60 }];
+  // Bold the section header and totals
+  XLSX.utils.book_append_sheet(wb, wsRecon, 'Reconciliation');
+
+  // Generate filename with timestamp
+  const now = new Date();
+  const stamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const fname = `CPF_Crystal_Ball_${stamp}.xlsx`;
+
+  XLSX.writeFile(wb, fname);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildLevers('a', false);  // pre-55 person A
+buildLevers('a', true);   // post-55 person A
+buildLevers('b', false);  // pre-55 person B
+buildLevers('b', true);   // post-55 person B
+setupReturnPills('base-pills');
+setupReturnPills('crash-pills');
+recalc();
+</script>
+
+</body>
+</html>
