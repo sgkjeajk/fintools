@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       tools:
-        description: "Tools to refresh: backtest, investment, crash, or all"
+        description: "Tools to refresh: backtest, investment, crash, ai-crash, or all"
         required: true
         default: all
         type: string
